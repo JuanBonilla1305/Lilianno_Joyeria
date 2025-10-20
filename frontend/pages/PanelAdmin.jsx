@@ -1,50 +1,97 @@
-import { useEffect, useState } from 'react';
-import api from "../src/api";
+import { useNavigate } from "react-router-dom";
+import { FileSpreadsheet, ShoppingBag, DollarSign, TrendingUp, CreditCard } from "lucide-react";
+import { useEffect, useState } from "react";
+import api from "../src/api.js";
 
-
-export default function PanelAdmin(){
-  const [ventas, setVentas] = useState([]);
+export default function PanelAdmin() {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    ventas: 0,
+    gastos: 0,
+    balance: 0,
+  });
 
   useEffect(() => {
-    async function load() {
+    // 🔹 Simulación de datos o llamada real al backend
+    const loadStats = async () => {
       try {
-        const res = await api.get('/api/ventas'); // endpoint admin
-        setVentas(res.data);
+        // const { data } = await api.get("/api/admin/stats");
+        // setStats(data);
+        // Por ahora datos simulados
+        setStats({
+          ventas: 12800000,
+          gastos: 4200000,
+          balance: 8600000,
+        });
       } catch (err) {
-        console.error(err);
+        console.error("❌ Error al cargar estadísticas:", err);
       }
-    }
-    load();
+    };
+    loadStats();
   }, []);
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold text-[var(--color-primary)]">Panel Administrador</h2>
-      <div className="mt-4 grid gap-4">
-        {ventas.length === 0 ? <p className="text-[var(--color-muted)]">No hay ventas registradas</p> :
-          ventas.map(v => (
-            <div key={v._id} className="card p-4 flex justify-between items-center">
-              <div>
-                <p className="font-semibold">{v.productoNombre}</p>
-                <p className="text-[var(--color-muted)]">Fecha: {new Date(v.createdAt).toLocaleString()}</p>
-              </div>
-              <div className="text-[var(--color-primary)] font-bold"> ${v.total}</div>
-            </div>
-          ))
-        }
+    <div className="min-h-screen bg-[#0b0b0b] text-white flex flex-col items-center py-16 px-6">
+      {/* 🔹 Encabezado */}
+      <h1 className="text-4xl font-bold text-[#d4af37] mb-2">
+        Panel Administrativo
+      </h1>
+      <p className="text-gray-400 mb-10 text-center">
+        Bienvenido al panel de control. Supervisa tus ventas, genera reportes y actualiza tu catálogo.
+      </p>
+
+      {/* 🔹 Tarjetas estadísticas */}
+      <div className="grid md:grid-cols-3 gap-6 max-w-5xl w-full mb-10">
+        <div className="bg-[#111] border border-[#d4af37]/40 rounded-2xl p-6 text-center hover:border-[#d4af37] transition">
+          <DollarSign className="w-8 h-8 mx-auto text-[#d4af37] mb-3" />
+          <h3 className="text-[#d4af37] text-lg font-semibold">Ventas Totales</h3>
+          <p className="text-2xl font-bold mt-2">${stats.ventas.toLocaleString("es-CO")}</p>
+        </div>
+
+        <div className="bg-[#111] border border-[#d4af37]/40 rounded-2xl p-6 text-center hover:border-[#d4af37] transition">
+          <CreditCard className="w-8 h-8 mx-auto text-[#d4af37] mb-3" />
+          <h3 className="text-[#d4af37] text-lg font-semibold">Gastos Totales</h3>
+          <p className="text-2xl font-bold mt-2">${stats.gastos.toLocaleString("es-CO")}</p>
+        </div>
+
+        <div className="bg-[#111] border border-[#d4af37]/40 rounded-2xl p-6 text-center hover:border-[#d4af37] transition">
+          <TrendingUp className="w-8 h-8 mx-auto text-[#d4af37] mb-3" />
+          <h3 className="text-[#d4af37] text-lg font-semibold">Balance General</h3>
+          <p className="text-2xl font-bold mt-2">${stats.balance.toLocaleString("es-CO")}</p>
+        </div>
       </div>
-      <div className="mt-6">
-        <button onClick={async () => {
-            // ejemplo descarga de reporte: backend debe exponer /api/report?format=pdf
-            const res = await api.get('/api/report?format=pdf', { responseType: 'blob' });
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `reporte_ventas.pdf`);
-            document.body.appendChild(link);
-            link.click();
-        }} className="btn-primary px-4 py-2 rounded">Generar reporte PDF</button>
+
+      {/* 🔹 Opciones principales */}
+      <div className="grid sm:grid-cols-2 gap-6 max-w-3xl w-full">
+        {/* Botón editar catálogo */}
+        <button
+          onClick={() => navigate("/admin/catalogo")}
+          className="flex flex-col items-center justify-center gap-3 bg-[#111] border border-[#d4af37]/40 hover:border-[#d4af37] hover:shadow-[0_0_15px_rgba(212,175,55,0.3)] transition rounded-2xl p-8 text-[#d4af37] font-semibold"
+        >
+          <ShoppingBag className="w-10 h-10" />
+          <span className="text-lg">Editar Catálogo</span>
+          <p className="text-xs text-gray-400 text-center mt-1">
+            Agrega, edita o elimina joyas del catálogo.
+          </p>
+        </button>
+
+        {/* Botón generar reportes */}
+        <button
+          onClick={() => navigate("/admin/reportes")}
+          className="flex flex-col items-center justify-center gap-3 bg-[#111] border border-[#d4af37]/40 hover:border-[#d4af37] hover:shadow-[0_0_15px_rgba(212,175,55,0.3)] transition rounded-2xl p-8 text-[#d4af37] font-semibold"
+        >
+          <FileSpreadsheet className="w-10 h-10" />
+          <span className="text-lg">Generar Reporte</span>
+          <p className="text-xs text-gray-400 text-center mt-1">
+            Exporta reportes en formato PDF o Excel.
+          </p>
+        </button>
       </div>
+
+      {/* 🔹 Pie de página */}
+      <footer className="mt-16 text-sm text-gray-500 text-center">
+        © 2025 Lilianno Joyería · Hecho con amor y brillo ✨
+      </footer>
     </div>
   );
 }

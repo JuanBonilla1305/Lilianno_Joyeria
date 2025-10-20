@@ -1,37 +1,49 @@
-// src/controllers/productController.js
-import Producto from "../models/product.js";
+import Producto from "../models/product.js"; // ajusta el path si es diferente
 
-// ✅ Registrar producto
+// 🟢 Crear producto
 export const crearProducto = async (req, res) => {
   try {
-    const producto = new Producto(req.body);
-    await producto.save();
-    res.status(201).json({ message: "Producto registrado con éxito", producto });
-  } catch (error) {
-    console.error("Error al registrar producto:", error);
-    res.status(500).json({ message: "Error al registrar producto", error });
+    const nuevoProducto = await Producto.create(req.body);
+    res.status(201).json(nuevoProducto);
+  } catch (err) {
+    res.status(500).json({ message: "Error al crear producto", error: err.message });
   }
 };
 
-// ✅ Obtener todos los productos
+// 🟢 Obtener todos los productos
 export const obtenerProductos = async (req, res) => {
   try {
     const productos = await Producto.find();
-    res.status(200).json(productos);
-  } catch (error) {
-    console.error("Error al obtener productos:", error);
-    res.status(500).json({ message: "Error al obtener productos" });
+    res.json(productos);
+  } catch (err) {
+    res.status(500).json({ message: "Error al obtener productos", error: err.message });
   }
 };
 
-// ✅ Obtener producto por ID
-export const obtenerProductoPorId = async (req, res) => {
+// 🟡 Actualizar producto
+export const actualizarProducto = async (req, res) => {
   try {
-    const producto = await Producto.findById(req.params.id);
-    if (!producto) return res.status(404).json({ message: "Producto no encontrado" });
-    res.status(200).json(producto);
-  } catch (error) {
-    console.error("Error al obtener producto:", error);
-    res.status(500).json({ message: "Error al obtener producto" });
+    const producto = await Producto.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!producto) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+    res.json(producto);
+  } catch (err) {
+    res.status(500).json({ message: "Error al actualizar producto", error: err.message });
+  }
+};
+
+// 🔴 Eliminar producto
+export const eliminarProducto = async (req, res) => {
+  try {
+    const producto = await Producto.findByIdAndDelete(req.params.id);
+    if (!producto) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+    res.json({ message: "Producto eliminado correctamente" });
+  } catch (err) {
+    res.status(500).json({ message: "Error al eliminar producto", error: err.message });
   }
 };

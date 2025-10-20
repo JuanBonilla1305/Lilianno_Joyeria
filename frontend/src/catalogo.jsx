@@ -1,99 +1,95 @@
-// src/catalogo.jsx
-import { useEffect, useState } from "react";
-import api from "./api";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { useCart } from "./context/CartContext.jsx"; // 👈 importamos el contexto
+import { useEffect, useState } from "react";
+import api from "../src/api";
+import { useCart } from "../src/context/CartContext.jsx";
+import ToastCenter from "../components/ToastCenter.jsx";
 
 export default function Catalogo() {
   const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { addItem } = useCart(); // 👈 obtenemos la función addItem del carrito
+  const [mensaje, setMensaje] = useState("");
+  const { addItem } = useCart();
 
   useEffect(() => {
-    api
-      .get("/api/products")
-      .then((res) => {
-        console.log("✅ Productos recibidos:", res.data);
-        const data = Array.isArray(res.data) ? res.data : [res.data];
+    const fetchProductos = async () => {
+      try {
+        const { data } = await api.get("/api/products");
         setProductos(data);
-      })
-      .catch((err) => {
-        console.error("❌ Error al cargar productos:", err);
-        setError("Error al cargar los productos.");
-      })
-      .finally(() => setLoading(false));
+      } catch (e) {
+        console.error("Error cargando productos:", e);
+      }
+    };
+    fetchProductos();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-[#0f0f0f] text-gray-300 text-xl">
-        Cargando catálogo...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-[#0f0f0f] text-red-400 text-xl">
-        {error}
-      </div>
-    );
-  }
+  const handleAddToCart = (producto) => {
+    addItem(producto);
+    setMensaje("✨ Producto añadido al carrito");
+    setTimeout(() => setMensaje(""), 2000);
+  };
 
   return (
-    <div className="bg-[#0f0f0f] min-h-screen text-white py-20 px-8">
-      <h2 className="text-5xl text-center font-semibold mb-16">
-        Nuestro <span className="text-[#D4AF37]">Catálogo</span>
-      </h2>
+    <div className="min-h-screen bg-gradient-to-b from-[#0b0b0b] to-[#1a1200] text-white py-20 px-8">
+      {/* Título */}
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center text-4xl font-bold mb-10"
+      >
+        <span className="text-[#d4af37]">Colección</span> Lilianno
+      </motion.h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
-        {productos.map((prod) => (
+      {/* Grid de productos */}
+      <motion.div
+        layout
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 max-w-7xl mx-auto"
+      >
+        {productos.map((p, i) => (
           <motion.div
-            key={prod._id}
-            whileHover={{ scale: 1.05 }}
-            className="bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg border border-[#D4AF37]/40"
+            key={p._id}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            whileHover={{ scale: 1.03 }}
+            className="bg-[#111]/80 border border-[#d4af37]/20 rounded-2xl overflow-hidden shadow-[0_0_25px_rgba(212,175,55,0.15)] hover:shadow-[0_0_40px_rgba(212,175,55,0.25)] transition-all duration-300 flex flex-col"
           >
-            <img
-              src={prod.imagen || "https://via.placeholder.com/300x300?text=Sin+Imagen"}
-              alt={prod.nombre}
-              onError={(e) =>
-                (e.target.src =
-                  "https://via.placeholder.com/300x300?text=Sin+Imagen")
-              }
-              className="w-full h-64 object-cover"
-            />
+            {/* Imagen */}
+            <div className="relative">
+              <img
+                src={p.imagen || "/placeholder-jewel.jpg"}
+                alt={p.nombre}
+                className="w-full h-72 object-cover hover:scale-105 transition-transform duration-500"
+              />
+              <span className="absolute top-3 right-3 bg-[#d4af37] text-black text-xs px-3 py-1 rounded-full shadow">
+                {p.stock > 0 ? "Disponible" : "Agotado"}
+              </span>
+            </div>
 
-            <div className="p-5 text-center">
-              <h3 className="text-xl font-medium mb-2">{prod.nombre}</h3>
-              <p className="text-[#D4AF37] font-semibold mb-3">
-                ${prod.precio?.toLocaleString("es-CO")}
-              </p>
-              <p className="text-gray-400 text-sm mb-3">{prod.descripcion}</p>
+            {/* Info */}
+            <div className="flex flex-col justify-between flex-grow p-5">
+              <div>
+                <h3 className="font-semibold text-lg mb-1 line-clamp-1">{p.nombre}</h3>
+                <p className="text-sm text-zinc-400 line-clamp-2">{p.descripcion}</p>
+              </div>
 
-              <div className="flex gap-3 justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  onClick={() => addItem(prod, 1)} // 👈 aquí agregas al carrito
-                  className="bg-[#D4AF37] text-black px-5 py-2 rounded-full font-medium hover:bg-[#b6912e] transition"
+              <div className="flex items-center justify-between mt-4">
+                <span className="text-[#d4af37] font-semibold">
+                  ${p.precio?.toLocaleString("es-CO")}
+                </span>
+                <button
+                  onClick={() => handleAddToCart(p)}
+                  disabled={p.stock <= 0}
+                  className="bg-[#d4af37] text-black font-semibold px-4 py-2 rounded-full hover:bg-[#e8c157] transition disabled:bg-gray-500"
                 >
-                  Añadir al carrito
-                </motion.button>
-
-                <Link to={`/producto/${prod._id}`}>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    className="border border-[#D4AF37] text-[#D4AF37] px-5 py-2 rounded-full font-medium hover:bg-[#b6912e]/10 transition"
-                  >
-                    Ver Detalle
-                  </motion.button>
-                </Link>
+                  Añadir
+                </button>
               </div>
             </div>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
+
+      <ToastCenter mensaje={mensaje} />
     </div>
   );
 }

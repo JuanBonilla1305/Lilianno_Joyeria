@@ -21,6 +21,8 @@ conectarDB();
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/ventas", ventaRoutes);
+app.use("/api/ventas", ventaRoutes);
+
 
 // Puerto
 const PORT = process.env.PORT || 3001;

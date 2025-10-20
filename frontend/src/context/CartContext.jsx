@@ -1,47 +1,50 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
+export function CartProvider({ children }) {
   const [items, setItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem("cart_items");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    const stored = localStorage.getItem("cart");
+    return stored ? JSON.parse(stored) : [];
   });
 
-  // Persistencia
   useEffect(() => {
-    localStorage.setItem("cart_items", JSON.stringify(items));
+    localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product, qty = 1) => {
-    setItems(prev => {
-      const ix = prev.findIndex(p => p._id === product._id);
-      if (ix >= 0) {
-        const copy = [...prev];
-        copy[ix] = { ...copy[ix], qty: copy[ix].qty + qty };
-        return copy;
+  const addItem = (item, qty = 1) => {
+    setItems((prev) => {
+      const existing = prev.find((i) => i._id === item._id);
+      if (existing) {
+        return prev.map((i) =>
+          i._id === item._id ? { ...i, qty: i.qty + qty } : i
+        );
       }
-      return [...prev, { ...product, qty }];
+      return [...prev, { ...item, qty }];
     });
   };
 
-  const removeItem = (id) => setItems(prev => prev.filter(p => p._id !== id));
-  const clear = () => setItems([]);
-  const updateQty = (id, qty) =>
-    setItems(prev => prev.map(p => (p._id === id ? { ...p, qty: Math.max(1, qty) } : p)));
+  const updateQty = (id, qty) => {
+    setItems((prev) =>
+      prev.map((i) => (i._id === id ? { ...i, qty } : i))
+    );
+  };
 
-  const total = useMemo(
-    () => items.reduce((acc, p) => acc + p.precio * p.qty, 0),
-    [items]
+  const removeItem = (id) => {
+    setItems((prev) => prev.filter((i) => i._id !== id));
+  };
+
+  const clearCart = () => setItems([]);
+
+  const subtotal = items.reduce((acc, i) => acc + i.precio * i.qty, 0);
+
+  return (
+    <CartContext.Provider
+      value={{ items, addItem, updateQty, removeItem, clearCart, subtotal }}
+    >
+      {children}
+    </CartContext.Provider>
   );
-
-  const value = { items, addItem, removeItem, updateQty, clear, total };
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-};
+}
 
 export const useCart = () => useContext(CartContext);

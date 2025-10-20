@@ -1,18 +1,17 @@
-// src/routes/product.js
 import express from "express";
-import { obtenerProductos, obtenerProductoPorId, crearProducto } from "../controllers/productController.js";
-import { protegerRuta } from "../middleware/authMiddleware.js";
-import { autorizar } from "../middleware/roleMiddleware.js";
+import {
+  crearProducto,
+  obtenerProductos,
+  actualizarProducto,
+  eliminarProducto,
+} from "../controllers/productController.js";
 
 const router = express.Router();
 
-// Ver todos los productos
+// CRUD de productos
 router.get("/", obtenerProductos);
-
-// Ver producto por ID
-router.get("/:id", obtenerProductoPorId);
-
-// Registrar nuevo producto (solo admin)
-router.post("/", protegerRuta, autorizar("admin"), crearProducto);
+router.post("/", crearProducto);
+router.put("/:id", actualizarProducto);
+router.delete("/:id", eliminarProducto);
 
 export default router;

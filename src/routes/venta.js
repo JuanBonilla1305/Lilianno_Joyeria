@@ -1,8 +1,17 @@
 import express from "express";
-import { obtenerVentas, crearVenta } from "../controllers/ventaController.js";
+import {
+  crearProducto,
+  obtenerProductos,
+  actualizarProducto,
+  eliminarProducto,
+} from "../controllers/productController.js";
+
 const router = express.Router();
 
-router.get("/", obtenerVentas);
-router.post("/", crearVenta);
+// 🔹 CRUD de productos
+router.get("/", obtenerProductos);
+router.post("/", crearProducto);
+router.put("/:id", actualizarProducto);
+router.delete("/:id", eliminarProducto);
 
 export default router;

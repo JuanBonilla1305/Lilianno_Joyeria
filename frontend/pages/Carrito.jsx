@@ -1,131 +1,105 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+// src/pages/Carrito.jsx
+import { X, Trash2, Minus, Plus } from "lucide-react";
 import { useCart } from "../src/context/CartContext.jsx";
+import { Link } from "react-router-dom";
+
+const currency = (n) =>
+  new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(n || 0);
 
 export default function Carrito({ abierto, onClose }) {
-  const { items, removeItem, updateQty, total, clear } = useCart();
-  const navigate = useNavigate();
+  const { items, updateQty, removeItem, clearCart, subtotal } = useCart();
 
   return (
-    <AnimatePresence>
-      {abierto && (
-        <>
-          {/* Overlay oscuro – hace clic para cerrar */}
-          <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-[70]"
-          />
+    <div
+      className={`fixed left-0 right-0 top-0 z-50 bg-[#0b0b0b] text-white border-b border-[#d4af37]/40 transition-all duration-300 shadow-[0_8px_20px_rgba(212,175,55,0.15)] ${
+        abierto ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+      }`}
+    >
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#d4af37]/20">
+        <h3 className="text-lg font-semibold text-[#d4af37]">🛒 Tu carrito</h3>
+        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-          {/* Panel deslizante */}
-          <motion.aside
-            key="panel"
-            initial={{ x: 420 }}
-            animate={{ x: 0 }}
-            exit={{ x: 420 }}
-            transition={{ type: "tween", duration: 0.25 }}
-            className="fixed right-0 top-0 h-full w-full max-w-sm bg-[#0f0f0f] text-white z-[80] border-l border-[#d4af37]/30 flex flex-col"
-          >
-            {/* Header */}
-            <div className="h-16 px-4 flex items-center justify-between border-b border-[#d4af37]/20">
-              <h2 className="text-lg font-semibold">Tu carrito</h2>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-md hover:bg-white/5"
-                aria-label="Cerrar carrito"
+      <div className="max-h-[60vh] overflow-y-auto px-6 py-4 space-y-4">
+        {items.length === 0 ? (
+          <p className="text-center text-zinc-300">Tu carrito está vacío.</p>
+        ) : (
+          items.map((it) => {
+            const id = it._id ?? it.id;
+            return (
+              <div
+                key={id}
+                className="flex gap-3 border border-[#d4af37]/20 rounded-xl p-3 bg-[#111]"
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+                <img
+                  src={it.imagen || "/placeholder-jewel.jpg"}
+                  onError={(e) => (e.currentTarget.src = "/placeholder-jewel.jpg")}
+                  alt={it.nombre}
+                  className="w-20 h-20 object-cover rounded-lg"
+                />
+                <div className="flex-1">
+                  <h4 className="font-semibold leading-5">{it.nombre}</h4>
+                  <p className="text-[#d4af37] font-bold mt-1">{currency(it.precio)}</p>
 
-            {/* Contenido scrollable */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {items.length === 0 ? (
-                <p className="text-sm text-zinc-400">
-                  Aún no hay productos en tu carrito.
-                </p>
-              ) : (
-                items.map((item) => (
-                  <div
-                    key={item._id}
-                    className="flex items-center gap-3 border border-[#d4af37]/20 rounded-lg p-3"
-                  >
-                    <img
-                      src={item.imagen || "https://placehold.co/64x64?text=Joya"}
-                      alt={item.nombre}
-                      className="w-16 h-16 object-cover rounded-md"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{item.nombre}</p>
-                      <p className="text-sm text-zinc-400">
-                        ${item.precio.toLocaleString("es-CO")}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          className="px-2 border border-zinc-700 rounded hover:bg-white/5"
-                          onClick={() => updateQty(item._id, item.qty - 1)}
-                        >
-                          −
-                        </button>
-                        <span className="min-w-8 text-center text-sm">
-                          {item.qty}
-                        </span>
-                        <button
-                          className="px-2 border border-zinc-700 rounded hover:bg-white/5"
-                          onClick={() => updateQty(item._id, item.qty + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      className="p-1 rounded border border-[#d4af37]/40"
+                      onClick={() => updateQty(id, it.qty - 1)}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="w-10 text-center">{it.qty}</span>
+                    <button
+                      className="p-1 rounded border border-[#d4af37]/40"
+                      onClick={() => updateQty(id, it.qty + 1)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
 
                     <button
-                      onClick={() => removeItem(item._id)}
-                      className="text-red-400 text-sm hover:text-red-300"
+                      className="ml-auto p-2 rounded hover:bg-red-600/20 text-red-400"
+                      onClick={() => removeItem(id)}
+                      title="Eliminar"
                     >
-                      Eliminar
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                ))
-              )}
-            </div>
-
-            {/* Footer fijo con total + acciones */}
-            <div className="border-t border-[#d4af37]/20 p-4 bg-[#0f0f0f]">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm">Total</span>
-                <span className="text-lg font-bold text-[#d4af37]">
-                  ${total.toLocaleString("es-CO")}
-                </span>
+                </div>
               </div>
+            );
+          })
+        )}
+      </div>
 
-              <div className="flex gap-2">
-                <button
-                  className="flex-1 py-2 rounded-lg border border-zinc-700 text-sm hover:bg-white/5"
-                  onClick={clear}
-                  disabled={items.length === 0}
-                >
-                  Vaciar
-                </button>
-                <button
-                  className="flex-1 py-2 rounded-lg bg-[#d4af37] text-black font-semibold text-sm hover:opacity-90 disabled:opacity-60"
-                  onClick={() => {
-                    onClose?.();
-                    navigate("/checkout");
-                  }}
-                  disabled={items.length === 0}
-                >
-                  Ir a pagar
-                </button>
-              </div>
-            </div>
-          </motion.aside>
-        </>
+      {items.length > 0 && (
+        <div className="border-t border-[#d4af37]/20 px-6 py-4 space-y-3 bg-[#0e0e0e]">
+          <div className="flex justify-between text-zinc-300">
+            <span>Subtotal</span>
+            <span className="font-semibold text-white">
+              {currency(subtotal)}
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={clearCart}
+              className="flex-1 py-2 rounded-full border border-[#d4af37]/40 text-zinc-200 hover:bg-white/5"
+            >
+              Vaciar
+            </button>
+
+            <Link
+              to="/checkout"
+              className="flex-1 text-center py-2 rounded-full bg-[#d4af37] text-black font-semibold hover:opacity-90"
+              onClick={onClose}
+            >
+              Ir a pagar
+            </Link>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </div>
   );
 }
