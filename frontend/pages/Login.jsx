@@ -41,7 +41,7 @@ export default function Login() {
   const handleGoogleLogin = () => {
     const API_URL =
   import.meta.env.MODE === "production"
-    ? "https://lilianno-backend.onrender.com" // dominio del backend
+    ? "https://lilianno-joyeria.onrender.com" // dominio del backend
     : "http://localhost:3001";
 
 window.location.href = `${API_URL}/api/auth/google`;
