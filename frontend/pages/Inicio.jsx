@@ -40,7 +40,7 @@ export default function Inicio() {
           {/* 🔹 Muestra botón de login o saludo si ya hay sesión */}
           {!user ? (
             <a
-              href="http://localhost:3001/api/auth/google"
+              
               className="bg-[#d4af37] text-black px-8 py-3 rounded-full font-medium hover:bg-[#e8c157] transition"
             >
               Iniciar sesión con Google
@@ -56,7 +56,7 @@ export default function Inicio() {
 
           <div className="flex justify-center gap-6 mt-8">
             <a
-              href="https://www.instagram.com/"
+              href="https://www.instagram.com/lilianno_joyeria?igsh=ZTh5bXh1Ymdrdmc3"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-[#d4af37] text-black px-6 py-3 rounded-full font-medium hover:bg-[#e8c157] hover:shadow-[0_0_15px_rgba(212,175,55,0.6)] transition"
@@ -65,7 +65,7 @@ export default function Inicio() {
             </a>
 
             <a
-              href="https://wa.me/573001234567"
+              href="https://wa.me/573243595562"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-full font-medium hover:bg-green-400 hover:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition"
@@ -109,7 +109,7 @@ export default function Inicio() {
       {/* 🌐 REDES SOCIALES */}
       <footer className="absolute bottom-6 right-6 flex flex-col items-end gap-4 z-50">
         <a
-          href="https://www.instagram.com/"
+          href="https://www.instagram.com/lilianno_joyeria?igsh=ZTh5bXh1Ymdrdmc3"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 bg-[#d4af37] text-black px-4 py-2 rounded-full font-medium hover:bg-[#e8c157] transition"
@@ -118,7 +118,7 @@ export default function Inicio() {
         </a>
 
         <a
-          href="https://wa.me/573001234567"
+          href="https://wa.me/573243595562"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full font-medium hover:bg-green-400 transition"

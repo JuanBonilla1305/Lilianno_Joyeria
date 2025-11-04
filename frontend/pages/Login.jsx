@@ -38,8 +38,8 @@ export default function Login() {
     }
   };
 
- const handleGoogleLogin = () => {
-  window.location.href = "https://lilianno-joyeria.onrender.com/api/auth/google"; // 👈 backend
+const handleGoogleLogin = () => {
+  window.location.href = "https://lilianno-joyeria.onrender.com/api/auth/google";
 };
 
   return (
