@@ -11,11 +11,11 @@ import Registro from "../pages/Registro.jsx";
 import Carrito from "../pages/Carrito.jsx";
 import Personalizar from "../pages/Personalizar.jsx";
 import PanelAdmin from "../pages/PanelAdmin.jsx";
-import AdminProductos from "../pages/AdminProductos.jsx"; // 👈 IMPORTANTE
+import AdminProductos from "../pages/AdminProductos.jsx";
 import AdminDashboard from "../pages/AdminDashboard.jsx";
 import PanelCliente from "../pages/PanelCliente.jsx";
 import Checkout from "./Checkout.jsx";
-
+import LoginSuccess from "../pages/loginSuccess.jsx";
 // 🧠 Contextos y rutas protegidas
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
@@ -60,7 +60,6 @@ export default function App() {
                   </AdminRoute>
                 }
               />
-
               <Route
                 path="/admin"
                 element={
@@ -69,8 +68,6 @@ export default function App() {
                   </AdminRoute>
                 }
               />
-
-              {/* ✅ Ruta funcional para editar catálogo */}
               <Route
                 path="/admin/catalogo"
                 element={
@@ -79,6 +76,9 @@ export default function App() {
                   </AdminRoute>
                 }
               />
+
+              {/* 🧩 Nueva ruta para manejar el callback de Google */}
+              <Route path="/login-success" element={<LoginSuccess />} />
             </Routes>
           </main>
 

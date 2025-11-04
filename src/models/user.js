@@ -5,24 +5,31 @@ const usuarioSchema = new mongoose.Schema({
   nombre: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
-  email: {                    // 👈 cambia "correo" por "email"
+  email: {
     type: String,
     required: true,
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
   },
   password: {
     type: String,
-    required: true
+    required: function () {
+      // Solo requiere contraseña si NO tiene googleId
+      return !this.googleId;
+    },
+  },
+  googleId: {
+    type: String,
+    default: null,
   },
   rol: {
     type: String,
     enum: ["admin", "cliente"],
-    default: "cliente"
-  }
+    default: "cliente",
+  },
 });
 
 const Usuario = mongoose.model("User", usuarioSchema);

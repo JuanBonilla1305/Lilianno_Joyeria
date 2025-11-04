@@ -1,13 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../api.js";
 
-const AuthContext = createContext();
+export const AuthContext = createContext(); // 👈 ahora está exportado
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Mantiene la sesión al recargar
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
