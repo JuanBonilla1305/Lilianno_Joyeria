@@ -1,45 +1,45 @@
-import { useEffect, useContext } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-
-import { AuthContext } from "../src/context/AuthContext.jsx";
+import api from "../api.js";
 
 export default function LoginSuccess() {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
 
-    if (token) {
-      // 1️⃣ Guardar token en localStorage
-      localStorage.setItem("token", token);
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-      // 2️⃣ Decodificar token para obtener los datos del usuario
+    try {
+      // Decodifica el token
       const decoded = jwtDecode(token);
-const userData = {
-  id: decoded.id,
-  rol: decoded.rol,
-  nombre: decoded.nombre, // 👈 nuevo campo
-};
 
-      // 3️⃣ Guardar usuario en localStorage
-      localStorage.setItem("user", JSON.stringify(userData));
+      // Guarda en localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(decoded));
 
-      // 4️⃣ Actualizar el contexto (mantiene sesión sin recargar)
-      if (login) login({ token, user: userData });
+      // Configura Axios para futuras peticiones
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      // 5️⃣ Redirigir al inicio o al panel correspondiente
-      navigate("/");
-    } else {
+      // Redirige según rol
+      const destino = decoded.rol === "admin" ? "/panel" : "/catalogo";
+      navigate(destino);
+    } catch (err) {
+      console.error("❌ Error procesando token:", err);
       navigate("/login");
     }
-  }, [navigate, login]);
+  }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center h-screen text-lg text-gray-300">
-      Iniciando sesión con Google...
+    <div className="flex items-center justify-center min-h-screen text-white bg-black">
+      <p className="text-lg text-[#d4af37] animate-pulse">
+        Iniciando sesión con Google...
+      </p>
     </div>
   );
 }
