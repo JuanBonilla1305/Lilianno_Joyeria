@@ -29,7 +29,7 @@ router.get(
 
    const FRONTEND_URL =
   process.env.NODE_ENV === "production"
-    ? "https://lilianno.onrender.com" // dominio del frontend en Render
+    ? "https://lilianno.onrender-1.com" // dominio del frontend en Render
     : "http://localhost:5173";
 
 res.redirect(`${FRONTEND_URL}/login-success?token=${token}`);
