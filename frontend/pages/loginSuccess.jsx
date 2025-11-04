@@ -16,17 +16,17 @@ export default function LoginSuccess() {
     }
 
     try {
-      // Decodifica el token
+      // Decodificar token
       const decoded = jwtDecode(token);
 
-      // Guarda en localStorage
+      // Guardar sesión
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(decoded));
 
-      // Configura Axios para futuras peticiones
+      // Configurar axios para futuras peticiones
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      // Redirige según rol
+      // Redirigir según rol
       const destino = decoded.rol === "admin" ? "/panel" : "/catalogo";
       navigate(destino);
     } catch (err) {
@@ -36,10 +36,8 @@ export default function LoginSuccess() {
   }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen text-white bg-black">
-      <p className="text-lg text-[#d4af37] animate-pulse">
-        Iniciando sesión con Google...
-      </p>
+    <div className="flex items-center justify-center min-h-screen bg-[#0b0b0b] text-[#d4af37] text-lg">
+      Procesando inicio de sesión...
     </div>
   );
 }
