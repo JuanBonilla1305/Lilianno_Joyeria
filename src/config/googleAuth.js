@@ -7,11 +7,10 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      callbackURL: "https://lilianno-joyeria.onrender.com/api/auth/google/callback", // 👈 dominio backend
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Buscar usuario existente o crear uno nuevo
         let user = await Usuario.findOne({ email: profile.emails[0].value });
 
         if (!user) {
@@ -31,10 +30,7 @@ passport.use(
   )
 );
 
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
+passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
   const user = await Usuario.findById(id);
   done(null, user);
