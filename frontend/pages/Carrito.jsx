@@ -102,4 +102,38 @@ export default function Carrito({ abierto, onClose }) {
       )}
     </div>
   );
+
+  const enviarPedido = async () => {
+  const nombre = prompt("Tu nombre completo:");
+  const direccion = prompt("Dirección de entrega:");
+  const telefono = prompt("Tu número de WhatsApp:");
+
+  const mensaje = encodeURIComponent(
+    `Hola, soy ${nombre}, quiero hacer un pedido:\n` +
+    `🧾 Total: $${total}\n` +
+    `📦 Productos: ${cart.map(p => p.nombre).join(", ")}\n` +
+    `🚚 Dirección: ${direccion}\n` +
+    `📞 Teléfono: ${telefono}`
+  );
+
+  // Abre WhatsApp con el mensaje
+  window.open(`https://wa.me/57XXXXXXXXXX?text=${mensaje}`, "_blank"); // 👈 reemplaza con número del dueño
+
+  // Registra la venta en backend
+  await fetch("https://lilianno-joyeria.onrender.com/api/ventas/pedido", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      items: cart,
+      total,
+      nombre,
+      direccion,
+      telefono,
+    }),
+  });
+
+  alert("✅ Pedido enviado y registrado correctamente");
+  clearCart(); // si tienes función para vaciar carrito
+};
+
 }

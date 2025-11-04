@@ -1,45 +1,67 @@
 // src/controllers/ventaController.js
+import Venta from "../models/venta.js";
 
-// Arreglo temporal para guardar las ventas en memoria
-let ventas = [];
-
-// Obtener todas las ventas
-export const obtenerVentas = (req, res) => {
-    try {
-        res.status(200).json(ventas);
-    } catch (error) {
-        console.error("Error al obtener las ventas:", error);
-        res.status(500).json({ message: "Error al obtener las ventas" });
-    }
+export const crearVenta = async (req, res) => {
+  try {
+    const venta = new Venta(req.body);
+    await venta.save();
+    res.status(201).json(venta);
+  } catch (error) {
+    console.error("Error al crear venta:", error);
+    res.status(500).json({ message: "Error al registrar la venta" });
+  }
 };
 
-// Crear una nueva venta
-export const crearVenta = (req, res) => {
-    try {
-        const { cliente, producto, cantidad, total } = req.body;
+export const obtenerVentas = async (req, res) => {
+  try {
+    const ventas = await Venta.find();
+    res.json(ventas);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener ventas" });
+  }
+};
 
-        if (!cliente || !producto || !cantidad || !total) {
-            return res.status(400).json({ message: "Faltan datos de la venta" });
-        }
+// 📊 Resumen simple
+export const obtenerResumen = async (req, res) => {
+  try {
+    const totalVentas = await Venta.countDocuments();
+    const totalIngresos = await Venta.aggregate([
+      { $group: { _id: null, total: { $sum: "$total" } } },
+    ]);
 
-        // Crear objeto de venta con un ID automático
-        const nuevaVenta = {
-            id: ventas.length + 1,
-            cliente,
-            producto,
-            cantidad,
-            total,
-            fecha: new Date().toISOString()
-        };
+    const metodosPago = await Venta.aggregate([
+      { $group: { _id: "$metodo_pago", count: { $sum: 1 } } },
+    ]);
 
-        ventas.push(nuevaVenta);
+    res.json({
+      totalVentas,
+      totalIngresos: totalIngresos[0]?.total || 0,
+      metodosPago: metodosPago.reduce((acc, m) => {
+        acc[m._id] = m.count;
+        return acc;
+      }, {}),
+    });
+  } catch (error) {
+    console.error("Error al generar resumen:", error);
+    res.status(500).json({ message: "Error al generar resumen" });
+  }
+};
+export const crearPedido = async (req, res) => {
+  try {
+    const { items, total, nombre, direccion, telefono } = req.body;
 
-        res.status(201).json({
-            message: "Venta registrada con éxito",
-            venta: nuevaVenta
-        });
-    } catch (error) {
-        console.error("Error al registrar la venta:", error);
-        res.status(500).json({ message: "Error al registrar la venta" });
-    }
+    const nuevaVenta = new Venta({
+      items,
+      total,
+      metodo_pago: "whatsapp",
+      estado: "pendiente",
+      notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
+    });
+
+    await nuevaVenta.save();
+    res.status(201).json({ message: "Pedido registrado correctamente", nuevaVenta });
+  } catch (error) {
+    console.error("❌ Error al registrar pedido:", error);
+    res.status(500).json({ message: "Error al registrar pedido" });
+  }
 };

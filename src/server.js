@@ -54,3 +54,20 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`✅ Servidor Lilianno escuchando en el puerto ${PORT}`);
 });
+
+// src/server.js (fragmento)
+import rateLimit from "express-rate-limit";
+
+
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://lilianno-joyeria-1.onrender.com",
+  ],
+  credentials: true,
+}));
+
+app.use("/api/", rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 600, // 600 req / 10 min por IP
+}));

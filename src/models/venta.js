@@ -19,11 +19,12 @@ const VentaSchema = new mongoose.Schema(
     total:       { type: Number, required: true, min: 0 },
     metodo_pago: { type: String, enum: ["tarjeta", "pse", "contraentrega"], default: "tarjeta" },
     estado:      { type: String, enum: ["pendiente", "pagada", "fallida"], default: "pagada" },
-    usuarioId:   { type: String, default: "" }, // opcional si luego asocias al usuario autenticado
+    usuarioId:   { type: String, default: "" },
     notas:       { type: String, default: "" },
     fecha:       { type: Date, default: Date.now },
   },
   { timestamps: true, versionKey: false }
 );
 
-export default mongoose.model("Venta", VentaSchema);
+// ✅ Usa modelo existente si ya fue compilado
+export default mongoose.models.Venta || mongoose.model("Venta", VentaSchema);
