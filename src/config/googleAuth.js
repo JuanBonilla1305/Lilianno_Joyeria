@@ -1,9 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import dotenv from "dotenv";
-import User from "../models/user.js"; // asegúrate de que esta ruta sea correcta
-
-dotenv.config(); // carga las variables .env ANTES de usarlas
+import Usuario from "../models/user.js";
 
 passport.use(
   new GoogleStrategy(
@@ -14,32 +11,31 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Busca si el usuario ya existe
-        let user = await User.findOne({ googleId: profile.id });
+        // Buscar usuario existente o crear uno nuevo
+        let user = await Usuario.findOne({ email: profile.emails[0].value });
 
         if (!user) {
-          // Si no existe, lo crea
-          user = new User({
+          user = await Usuario.create({
             nombre: profile.displayName,
             email: profile.emails[0].value,
-            googleId: profile.id,
-            rol: "cliente", // rol por defecto
+            password: "google_oauth", // placeholder
+            rol: "cliente",
           });
-          await user.save();
         }
 
         return done(null, user);
-      } catch (error) {
-        console.error("Error en la estrategia Google:", error);
-        return done(error, null);
+      } catch (err) {
+        return done(err, null);
       }
     }
   )
 );
 
-// Serialización y deserialización
-passport.serializeUser((user, done) => done(null, user.id));
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
 passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
+  const user = await Usuario.findById(id);
   done(null, user);
 });

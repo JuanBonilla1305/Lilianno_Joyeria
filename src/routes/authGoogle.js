@@ -16,25 +16,25 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req, res) => {
-   const token = jwt.sign(
-  {
-    id: req.user._id,
-    rol: req.user.rol,
-    nombre: req.user.nombre, // 👈 agregamos el nombre
-  },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
+    // 🔸 Crear token JWT
+    const token = jwt.sign(
+      {
+        id: req.user._id,
+        rol: req.user.rol,
+        nombre: req.user.nombre,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
+    // 🔸 Detectar la URL del frontend
+    // Render usará la variable FRONTEND_URL del entorno
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-   const FRONTEND_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://lilianno.onrender-1.com" // dominio del frontend en Render
-    : "http://localhost:5173";
+    console.log("✅ Redirigiendo a:", `${FRONTEND_URL}/login-success?token=${token}`);
 
-res.redirect(`${FRONTEND_URL}/login-success?token=${token}`);
-
-
+    // 🔸 Redirigir al frontend con el token
+    res.redirect(`${FRONTEND_URL}/login-success?token=${token}`);
   }
 );
 

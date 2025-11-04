@@ -39,15 +39,13 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    const API_URL =
-  import.meta.env.MODE === "production"
-    ? "https://lilianno-joyeria.onrender.com" // dominio del backend
-    : "http://localhost:3001";
+  const API_URL =
+    import.meta.env.MODE === "production"
+      ? "https://lilianno-joyeria.onrender.com" // 👈 cambia esto por tu dominio real
+      : "http://localhost:3001";
 
-window.location.href = `${API_URL}/api/auth/google`;
-
-  };
-
+  window.location.href = `${API_URL}/api/auth/google`;
+};
   return (
     <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center text-white px-4">
       <div className="flex flex-col md:flex-row items-stretch rounded-2xl overflow-hidden border border-[#d4af37]/40 shadow-[0_0_25px_rgba(212,175,55,0.25)] max-w-3xl w-full">
