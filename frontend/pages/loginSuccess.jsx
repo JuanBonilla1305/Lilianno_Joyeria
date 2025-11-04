@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import api from "../api.js";
+import api from "../src/api.js";
 
 export default function LoginSuccess() {
   const navigate = useNavigate();
