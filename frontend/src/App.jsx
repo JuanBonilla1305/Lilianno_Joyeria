@@ -16,6 +16,7 @@ import AdminDashboard from "../pages/AdminDashboard.jsx";
 import PanelCliente from "../pages/PanelCliente.jsx";
 import Checkout from "./Checkout.jsx";
 import LoginSuccess from "../pages/loginSuccess.jsx";
+
 // 🧠 Contextos y rutas protegidas
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
@@ -77,7 +78,7 @@ export default function App() {
                 }
               />
 
-              {/* 🧩 Nueva ruta para manejar el callback de Google */}
+              {/* 🧩 Callback de Google */}
               <Route path="/login-success" element={<LoginSuccess />} />
             </Routes>
           </main>
