@@ -16,8 +16,8 @@ export default function Inicio() {
     let w, h;
 
     function resize() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
+      w = (canvas.width = window.innerWidth);
+      h = (canvas.height = window.innerHeight);
     }
     resize();
     window.addEventListener("resize", resize);
@@ -90,6 +90,7 @@ export default function Inicio() {
       requestAnimationFrame(animate);
     }
 
+    // ✅ Corregido: eliminado el guion que rompía el parser
     function trackMouse(e) {
       mouse.current.x = e.clientX;
       mouse.current.y = e.clientY;
