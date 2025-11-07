@@ -2,9 +2,31 @@ import Venta from "../models/venta.js";
 
 export const crearVenta = async (req, res) => {
   try {
-    const venta = new Venta(req.body);
-    await venta.save();
-    res.status(201).json(venta);
+    // Crear la venta usando solo los datos necesarios
+    const { productos, total, cliente } = req.body;
+
+    // Validar que los productos existan y tengan precios
+    if (!productos || productos.length === 0) {
+      return res.status(400).json({ message: "Debe incluir productos" });
+    }
+
+    // Validar que el total sea mayor que 0
+    if (total <= 0) {
+      return res.status(400).json({ message: "El total debe ser mayor a 0" });
+    }
+
+    // Crear la venta con solo la información necesaria
+    const nuevaVenta = new Venta({
+      productos,
+      total,
+      cliente,  // Almacenamos solo el nombre del cliente
+    });
+
+    // Guardar la venta en la base de datos
+    await nuevaVenta.save();
+
+    // Retornar la respuesta con la venta creada
+    res.status(201).json(nuevaVenta);
   } catch (error) {
     console.error("Error al crear venta:", error);
     res.status(500).json({ message: "Error al registrar la venta" });
@@ -28,17 +50,9 @@ export const obtenerResumen = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$total" } } },
     ]);
 
-    const metodosPago = await Venta.aggregate([
-      { $group: { _id: "$metodo_pago", count: { $sum: 1 } } },
-    ]);
-
     res.json({
       totalVentas,
       totalIngresos: totalIngresos[0]?.total || 0,
-      metodosPago: metodosPago.reduce((acc, m) => {
-        acc[m._id] = m.count;
-        return acc;
-      }, {}),
     });
   } catch (error) {
     console.error("Error al generar resumen:", error);
@@ -46,29 +60,27 @@ export const obtenerResumen = async (req, res) => {
   }
 };
 
-// Crear pedido (modificado para usar usuario autenticado)
+// Crear pedido (modificado para usar los datos esenciales)
 export const crearPedido = async (req, res) => {
   try {
-    const { items, total, nombre, direccion, telefono } = req.body;
+    const { productos, total, nombre, direccion, telefono } = req.body;
 
     // Verifica que el usuario esté autenticado
     if (!req.user || !req.user._id) {
       return res.status(400).json({ message: "Usuario no autenticado" });
     }
 
-    // Crear una nueva venta con el ID real del usuario
+    // Crear la venta con solo los datos necesarios
     const nuevaVenta = new Venta({
-      usuarioId: req.user._id, // Guardamos el ID real del usuario autenticado
-      items: items.map((p) => ({
-        productoId: p.productoId || p._id,  // Asegúrate de que `productoId` esté presente
+      cliente: nombre, // Solo guardamos el nombre del cliente
+      productos: productos.map((p) => ({
         nombre: p.nombre,
-        precioUnit: p.precio,  // Asegúrate de que `precio` esté presente
-        cantidad: p.qty,
-        imagen: p.imagen || "",
-        subtotal: p.precio * p.qty,
+        precio: p.precio,
+        cantidad: p.cantidad,
+        subtotal: p.precio * p.cantidad,
       })),
       total,
-      metodo_pago: "whatsapp", // Esto puede cambiar según el método de pago
+      metodo_pago: "whatsapp", // Método de pago por WhatsApp
       estado: "pendiente",
       notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
     });

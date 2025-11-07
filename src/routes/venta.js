@@ -1,11 +1,10 @@
-// src/routes/venta.js
 import express from "express";
-import { isAuth, isAdmin } from "../middlewares/auth.js"; // 👈 Ojo, tu carpeta es "middleware", no "middlewares"
+import { isAuth, isAdmin } from "../middlewares/auth.js";
 import {
   crearVenta,
   obtenerVentas,
   obtenerResumen,
-  crearPedido, // 👈 AGREGA ESTA LÍNEA
+  crearPedido, // Asegúrate de que esta línea esté agregada
 } from "../controllers/ventaController.js";
 
 const router = express.Router();
