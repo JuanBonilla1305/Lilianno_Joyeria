@@ -1,6 +1,7 @@
 // src/controllers/ventaController.js
 
 import Venta from "../models/venta.js";
+import XLSX from "xlsx";  
 
 // Crear una nueva venta (solo guardamos los datos para balance)
 export const crearVenta = async (req, res) => {
@@ -60,5 +61,38 @@ export const obtenerResumen = async (req, res) => {
   } catch (error) {
     console.error("Error al generar resumen:", error);
     res.status(500).json({ message: "Error al generar resumen" });
+  }
+};
+
+
+
+// Función para generar el reporte de ventas
+export const generarReporteExcel = async (req, res) => {
+  try {
+    const ventas = await Venta.find();  // Obtener todas las ventas de la base de datos
+
+    // Preparar los datos para el archivo Excel
+    const data = ventas.map((venta) => ({
+      "Fecha": new Date(venta.fecha).toLocaleDateString(),
+      "Productos": venta.productos.map(p => `${p.nombre} x${p.cantidad}`).join(", "),
+      "Total": venta.total,
+      "Estado": venta.estado,
+    }));
+
+    // Convertir los datos a una hoja de Excel
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Ventas");
+
+    // Generar el archivo Excel
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
+
+    // Enviar el archivo como respuesta
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", "attachment; filename=report_ventas.xlsx");
+    res.send(excelBuffer);  // Enviar el buffer del archivo Excel al cliente
+  } catch (error) {
+    console.error("❌ Error al generar el reporte de ventas:", error);
+    res.status(500).json({ message: "Error al generar el reporte" });
   }
 };

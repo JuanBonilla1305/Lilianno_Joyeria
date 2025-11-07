@@ -21,7 +21,7 @@ export default function PanelAdmin() {
 
         // Calculamos balance
         const ventas = data.totalIngresos || 0;
-        const gastos = data.totalIngresos; // Si más adelante tienes un modelo de gastos, se actualiza
+        const gastos = 0; // Si más adelante tienes un modelo de gastos, se actualiza
         const balance = ventas - gastos;
 
         setStats({
@@ -43,8 +43,27 @@ export default function PanelAdmin() {
       maximumFractionDigits: 0,
     }).format(n || 0);
 
-    console.log("🔥 PANEL ADMIN CORRECTO CARGANDO, versión de prueba");
+  console.log("🔥 PANEL ADMIN CORRECTO CARGANDO, versión de prueba");
 
+  // Función para descargar el reporte de ventas en Excel
+  const downloadReporteExcel = () => {
+    // Realizamos una solicitud GET para obtener el archivo Excel
+    axios({
+      url: "https://lilianno-joyeria.onrender.com/api/ventas/reporte/excel", // La ruta para descargar el archivo
+      method: "GET",
+      responseType: "blob",  // Importante para manejar archivos
+    }).then((response) => {
+      // Crear un enlace para descargar el archivo Excel
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "report_ventas.xlsx");  // Nombre del archivo
+      document.body.appendChild(link);
+      link.click();
+    }).catch((error) => {
+      console.error("❌ Error al descargar el reporte Excel:", error);
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#0b0b0b] text-white flex flex-col items-center py-16 px-6">
@@ -93,7 +112,7 @@ export default function PanelAdmin() {
 
         {/* Botón generar reportes */}
         <button
-          onClick={() => navigate("/admin/reportes")}
+          onClick={downloadReporteExcel}
           className="flex flex-col items-center justify-center gap-3 bg-[#111] border border-[#d4af37]/40 hover:border-[#d4af37] hover:shadow-[0_0_15px_rgba(212,175,55,0.3)] transition rounded-2xl p-8 text-[#d4af37] font-semibold"
         >
           <FileSpreadsheet className="w-10 h-10" />
