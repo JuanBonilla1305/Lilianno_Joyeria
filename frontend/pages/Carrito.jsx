@@ -1,14 +1,8 @@
+import { useCart } from "../src/context/CartContext.jsx"; // Asegúrate de que este hook esté importado
+import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useCart } from "../src/context/CartContext.jsx";  // Ajusta la ruta según la ubicación de tu archivo
-import { X } from "lucide-react";  // Asegúrate de que esta importación está presente
-import { Minus } from "lucide-react";  // Asegúrate de que esta importación esté presente
-import { Plus } from "lucide-react";  // Asegúrate de que esta importación esté presente
-import { Trash2 } from "lucide-react"; 
-
-
-
 
 const currency = (n) =>
   new Intl.NumberFormat("es-CO", {
@@ -21,52 +15,23 @@ export default function Carrito({ abierto, onClose }) {
   const { items, updateQty, removeItem, clearCart, subtotal } = useCart();
 
   const enviarPedido = async () => {
-    const nombre = prompt("Tu nombre completo:");
-    const direccion = prompt("Dirección de entrega:");
-    const telefono = prompt("Tu número de WhatsApp:");
-
-    // Crear el mensaje para enviar a WhatsApp
-    const mensaje = encodeURIComponent(
-      `Hola, soy ${nombre}, quiero hacer un pedido:\n` +
-      `🧾 Total: ${currency(subtotal)}\n` +
-      `📦 Productos: ${items.map(p => p.nombre).join(", ")}\n` +
-      `🚚 Dirección: ${direccion}\n` +
-      `📞 Teléfono: ${telefono}`
-    );
-
-    // Redirigir a WhatsApp con el mensaje
-    window.open(`https://wa.me/573243595562?text=${mensaje}`, "_blank");
-
     try {
-      // Enviar el pedido al backend
       const token = localStorage.getItem("token"); // O donde sea que guardes el token
 
-      console.log("🔥 Enviando pedido:", {
-        productos: items.map((p) => ({
-          nombre: p.nombre,
-          precioUnit: p.precio,
-          cantidad: p.qty,
-          subtotal: p.precio * p.qty,
-        })),
-        total: subtotal,
-        notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
-      });
-
+      // Solo se envían los precios y totales, no más información
       const response = await axios.post(
         "https://lilianno-joyeria.onrender.com/api/ventas/pedido",
         {
           productos: items.map((p) => ({
-            nombre: p.nombre,
-            precioUnit: p.precio,
-            cantidad: p.qty,
-            subtotal: p.precio * p.qty,
+            precioUnit: p.precio,  // Solo guardamos el precio
+            cantidad: p.qty,       // Cantidad
+            subtotal: p.precio * p.qty,  // Subtotal
           })),
-          total: subtotal,
-          notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
+          total: subtotal,  // Guardamos solo el total
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Enviar el token como un Bearer token
           },
         }
       );
