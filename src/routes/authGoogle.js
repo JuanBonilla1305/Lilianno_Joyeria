@@ -20,12 +20,15 @@ router.get(
         return res.status(500).send("Error en autenticación");
       }
 
+      if (!process.env.JWT_SECRET) {
+        console.error("❌ JWT_SECRET ausente en variables de entorno");
+        return res
+          .status(500)
+          .json({ error: "Configuración inválida: falta JWT_SECRET" });
+      }
+
       const token = jwt.sign(
-        {
-          id: req.user._id,
-          rol: req.user.rol,
-          nombre: req.user.nombre,
-        },
+        { id: req.user._id, rol: req.user.rol, nombre: req.user.nombre },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -36,12 +39,16 @@ router.get(
           : "http://localhost:5173";
 
       console.log("✅ Usuario autenticado con Google:", req.user.email);
-      console.log("🌍 Redirigiendo a:", `${FRONTEND_URL}/login-success?token=${token}`);
+      console.log("🔑 Token emitido (7d). Redirigiendo a:", `${FRONTEND_URL}/login-success?token=...`);
 
+      // 🔄 MODO PRUEBA: responde JSON para validar que no reviente aquí
+      // return res.json({ ok: true, token });
+
+      // 🔁 MODO PROD: redirige al front con el token
       return res.redirect(`${FRONTEND_URL}/login-success?token=${token}`);
     } catch (err) {
       console.error("❌ Error final en callback Google:", err);
-      res.status(500).json({ error: "Error interno en autenticación Google" });
+      return res.status(500).json({ error: "Error interno en autenticación Google" });
     }
   }
 );

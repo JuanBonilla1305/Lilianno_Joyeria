@@ -65,9 +65,12 @@ export const crearPedido = async (req, res) => {
   try {
     const { productos, total, nombre, direccion, telefono } = req.body;
 
-    // Verifica que el usuario esté autenticado
-    if (!req.user || !req.user._id) {
-      return res.status(400).json({ message: "Usuario no autenticado" });
+    // Validación básica
+    if (!productos || productos.length === 0) {
+      return res.status(400).json({ message: "Debe incluir productos" });
+    }
+    if (!nombre) {
+      return res.status(400).json({ message: "Debe incluir el nombre del cliente" });
     }
 
     // Crear la venta con solo los datos necesarios
@@ -80,15 +83,13 @@ export const crearPedido = async (req, res) => {
         subtotal: p.precio * p.cantidad,
       })),
       total,
-      metodo_pago: "whatsapp", // Método de pago por WhatsApp
+      metodo_pago: "whatsapp",
       estado: "pendiente",
-      notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
+      notas: `Pedido por WhatsApp de ${nombre}${direccion ? ` - ${direccion}` : ""}${telefono ? ` - ${telefono}` : ""}`,
     });
 
-    // Guardar la venta en la base de datos
     await nuevaVenta.save();
 
-    // Confirmar que la venta fue guardada correctamente
     res.status(201).json({ message: "Pedido registrado correctamente", nuevaVenta });
   } catch (error) {
     console.error("❌ Error al registrar pedido:", error);
