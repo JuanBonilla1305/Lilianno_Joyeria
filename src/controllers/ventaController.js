@@ -4,10 +4,12 @@ export const crearVenta = async (req, res) => {
   try {
     const { productos, total, notas } = req.body;
 
+    // Validación de productos
     if (!productos || productos.length === 0) {
       return res.status(400).json({ message: "Debe incluir productos" });
     }
 
+    // Crear venta
     const venta = new Venta({
       productos: productos.map((p) => ({
         nombre: p.nombre,
@@ -16,7 +18,7 @@ export const crearVenta = async (req, res) => {
         subtotal: p.subtotal,
       })),
       total,
-      notas, // opcional, por ejemplo "Pedido por WhatsApp"
+      notas, // opcional, ejemplo: "Pedido por WhatsApp"
     });
 
     await venta.save();
