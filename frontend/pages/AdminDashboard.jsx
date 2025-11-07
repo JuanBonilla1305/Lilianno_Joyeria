@@ -31,7 +31,10 @@ export default function AdminDashboard() {
     // Cargar resumen (balance general)
     api
       .get("https://lilianno-joyeria.onrender.com/api/ventas/reporte/resumen")
-      .then((res) => setResumen(res.data))
+      .then((res) => {
+        console.log("Resumen cargado:", res.data);
+        setResumen(res.data);
+      })
       .catch((err) => console.error("Error al cargar resumen:", err));
   }, []);
 
@@ -64,15 +67,17 @@ export default function AdminDashboard() {
       <div className="grid md:grid-cols-2 gap-6 mb-12">
         <div className="bg-[#121212]/80 border border-[#d4af37]/30 rounded-2xl p-6 shadow-[0_0_25px_rgba(212,175,55,0.15)] text-center">
           <h2 className="text-xl text-[#d4af37] font-semibold mb-2">
-            Total de Ventas
+            Ventas Registradas
           </h2>
-          <p className="text-4xl font-bold">{resumen.totalVentas}</p>
+          <p className="text-4xl font-bold">{resumen.totalVentas || 0}</p>
         </div>
         <div className="bg-[#121212]/80 border border-[#d4af37]/30 rounded-2xl p-6 shadow-[0_0_25px_rgba(212,175,55,0.15)] text-center">
           <h2 className="text-xl text-[#d4af37] font-semibold mb-2">
             Ingresos Totales
           </h2>
-          <p className="text-4xl font-bold">{formatoCOP(resumen.totalIngresos)}</p>
+          <p className="text-4xl font-bold">
+            {formatoCOP(resumen.totalIngresos || 0)}
+          </p>
         </div>
       </div>
 
@@ -119,21 +124,34 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody>
-            {ventas.map((v) => (
-              <tr
-                key={v._id}
-                className="border-b border-gray-700 hover:bg-[#1e1e1e] transition"
-              >
-                <td className="py-3 px-4">
-                  {new Date(v.fecha).toLocaleDateString("es-CO")}
+            {ventas.length > 0 ? (
+              ventas.map((v) => (
+                <tr
+                  key={v._id}
+                  className="border-b border-gray-700 hover:bg-[#1e1e1e] transition"
+                >
+                  <td className="py-3 px-4">
+                    {new Date(v.fecha).toLocaleDateString("es-CO")}
+                  </td>
+                  <td className="py-3 px-4 text-gray-400">
+                    {v.productos
+                      .map((p) => `${p.nombre} x${p.cantidad}`)
+                      .join(", ")}
+                  </td>
+                  <td className="py-3 px-4">{formatoCOP(v.total)}</td>
+                  <td className="py-3 px-4">{v.notas || "Sin notas"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="4"
+                  className="text-center text-gray-400 py-6 italic"
+                >
+                  No hay ventas registradas todavía.
                 </td>
-                <td className="py-3 px-4 text-gray-400">
-                  {v.productos.map((p) => `${p.nombre} x${p.cantidad}`).join(", ")}
-                </td>
-                <td className="py-3 px-4">{formatoCOP(v.total)}</td>
-                <td className="py-3 px-4">{v.notas || "Sin notas"}</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

@@ -12,7 +12,6 @@ import Carrito from "../pages/Carrito.jsx";
 import Personalizar from "../pages/Personalizar.jsx";
 import PanelAdmin from "../pages/PanelAdmin.jsx";
 import AdminProductos from "../pages/AdminProductos.jsx";
-import AdminDashboard from "../pages/AdminDashboard.jsx";
 import PanelCliente from "../pages/PanelCliente.jsx";
 import Checkout from "./Checkout.jsx";
 import LoginSuccess from "../pages/loginSuccess.jsx";
@@ -52,7 +51,7 @@ export default function App() {
                 }
               />
 
-              {/* 👑 Rutas de administrador */}
+              {/* 👑 Panel administrativo */}
               <Route
                 path="/panel"
                 element={
@@ -61,14 +60,8 @@ export default function App() {
                   </AdminRoute>
                 }
               />
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminDashboard />
-                  </AdminRoute>
-                }
-              />
+
+              {/* 🛠 Gestión del catálogo */}
               <Route
                 path="/admin/catalogo"
                 element={

@@ -35,7 +35,7 @@ export default function Carrito({ abierto, onClose }) {
     const token = localStorage.getItem("token"); // O donde sea que guardes el token
 
     const response = await axios.post(
-      "https://lilianno-joyeria.onrender.com/api/ventas/pedido",
+      "https://lilianno-joyeria.onrender.com/api/ventas",
       {
         items: items.map((p) => ({
           productoId: p._id ?? p.id,
