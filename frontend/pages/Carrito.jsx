@@ -1,18 +1,83 @@
-// src/pages/Carrito.jsx
-import { X, Trash2, Minus, Plus } from "lucide-react";
-import { useCart } from "../src/context/CartContext.jsx";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const currency = (n) =>
-  new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(n || 0);
+  new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  }).format(n || 0);
 
 export default function Carrito({ abierto, onClose }) {
   const { items, updateQty, removeItem, clearCart, subtotal } = useCart();
 
+  const enviarPedido = async () => {
+    const nombre = prompt("Tu nombre completo:");
+    const direccion = prompt("Dirección de entrega:");
+    const telefono = prompt("Tu número de WhatsApp:");
+
+    // Crear el mensaje para enviar a WhatsApp
+    const mensaje = encodeURIComponent(
+      `Hola, soy ${nombre}, quiero hacer un pedido:\n` +
+      `🧾 Total: ${currency(subtotal)}\n` +
+      `📦 Productos: ${items.map(p => p.nombre).join(", ")}\n` +
+      `🚚 Dirección: ${direccion}\n` +
+      `📞 Teléfono: ${telefono}`
+    );
+
+    // Redirigir a WhatsApp con el mensaje
+    window.open(`https://wa.me/573243595562?text=${mensaje}`, "_blank");
+
+    try {
+      // Enviar el pedido al backend
+      const token = localStorage.getItem("token"); // O donde sea que guardes el token
+
+      console.log("🔥 Enviando pedido:", {
+        productos: items.map((p) => ({
+          nombre: p.nombre,
+          precioUnit: p.precio,
+          cantidad: p.qty,
+          subtotal: p.precio * p.qty,
+        })),
+        total: subtotal,
+        notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
+      });
+
+      const response = await axios.post(
+        "https://lilianno-joyeria.onrender.com/api/ventas/pedido",
+        {
+          productos: items.map((p) => ({
+            nombre: p.nombre,
+            precioUnit: p.precio,
+            cantidad: p.qty,
+            subtotal: p.precio * p.qty,
+          })),
+          total: subtotal,
+          notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("✅ Pedido enviado y registrado correctamente");
+      clearCart(); // Limpiar el carrito
+      onClose(); // Cerrar el carrito
+    } catch (error) {
+      console.error("❌ Error al enviar pedido:", error.response || error);
+      alert("❌ Ocurrió un error al enviar tu pedido.");
+    }
+  };
+
   return (
     <div
       className={`fixed left-0 right-0 top-0 z-50 bg-[#0b0b0b] text-white border-b border-[#d4af37]/40 transition-all duration-300 shadow-[0_8px_20px_rgba(212,175,55,0.15)] ${
-        abierto ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+        abierto
+          ? "translate-y-0 opacity-100"
+          : "-translate-y-full opacity-0 pointer-events-none"
       }`}
     >
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#d4af37]/20">
@@ -35,13 +100,17 @@ export default function Carrito({ abierto, onClose }) {
               >
                 <img
                   src={it.imagen || "/placeholder-jewel.jpg"}
-                  onError={(e) => (e.currentTarget.src = "/placeholder-jewel.jpg")}
+                  onError={(e) =>
+                    (e.currentTarget.src = "/placeholder-jewel.jpg")
+                  }
                   alt={it.nombre}
                   className="w-20 h-20 object-cover rounded-lg"
                 />
                 <div className="flex-1">
                   <h4 className="font-semibold leading-5">{it.nombre}</h4>
-                  <p className="text-[#d4af37] font-bold mt-1">{currency(it.precio)}</p>
+                  <p className="text-[#d4af37] font-bold mt-1">
+                    {currency(it.precio)}
+                  </p>
 
                   <div className="flex items-center gap-2 mt-2">
                     <button
@@ -90,50 +159,15 @@ export default function Carrito({ abierto, onClose }) {
               Vaciar
             </button>
 
-            <Link
-              to="/checkout"
-              className="flex-1 text-center py-2 rounded-full bg-[#d4af37] text-black font-semibold hover:opacity-90"
-              onClick={onClose}
+            <button
+              onClick={enviarPedido}
+              className="flex-1 py-2 rounded-full bg-green-500 text-black font-semibold hover:bg-green-600"
             >
-              Ir a pagar
-            </Link>
+              Hacer pedido
+            </button>
           </div>
         </div>
       )}
     </div>
   );
-
-  const enviarPedido = async () => {
-  const nombre = prompt("Tu nombre completo:");
-  const direccion = prompt("Dirección de entrega:");
-  const telefono = prompt("Tu número de WhatsApp:");
-
-  const mensaje = encodeURIComponent(
-    `Hola, soy ${nombre}, quiero hacer un pedido:\n` +
-    `🧾 Total: $${total}\n` +
-    `📦 Productos: ${cart.map(p => p.nombre).join(", ")}\n` +
-    `🚚 Dirección: ${direccion}\n` +
-    `📞 Teléfono: ${telefono}`
-  );
-
-  // Abre WhatsApp con el mensaje
-  window.open(`https://wa.me/57XXXXXXXXXX?text=${mensaje}`, "_blank"); // 👈 reemplaza con número del dueño
-
-  // Registra la venta en backend
-  await fetch("https://lilianno-joyeria.onrender.com/api/ventas/pedido", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      items: cart,
-      total,
-      nombre,
-      direccion,
-      telefono,
-    }),
-  });
-
-  alert("✅ Pedido enviado y registrado correctamente");
-  clearCart(); // si tienes función para vaciar carrito
-};
-
 }

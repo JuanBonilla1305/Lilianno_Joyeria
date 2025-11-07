@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FileSpreadsheet, ShoppingBag, DollarSign, TrendingUp, CreditCard } from "lucide-react";
 import { useEffect, useState } from "react";
-import api from "../src/api.js";
+import axios from "axios";
 
 export default function PanelAdmin() {
   const navigate = useNavigate();
@@ -11,17 +11,23 @@ export default function PanelAdmin() {
     balance: 0,
   });
 
+  console.log("🔥 PANEL ADMIN: Cargando el componente correcto");
   useEffect(() => {
-    // 🔹 Simulación de datos o llamada real al backend
     const loadStats = async () => {
       try {
-        // const { data } = await api.get("/api/admin/stats");
-        // setStats(data);
-        // Por ahora datos simulados
+        const { data } = await axios.get(
+          "https://lilianno-joyeria.onrender.com/api/ventas/reporte/resumen"
+        );
+
+        // Calculamos balance
+        const ventas = data.totalIngresos || 0;
+        const gastos = data.totalIngresos; // Si más adelante tienes un modelo de gastos, se actualiza
+        const balance = ventas - gastos;
+
         setStats({
-          ventas: 12800000,
-          gastos: 4200000,
-          balance: 8600000,
+          ventas,
+          gastos,
+          balance,
         });
       } catch (err) {
         console.error("❌ Error al cargar estadísticas:", err);
@@ -29,6 +35,16 @@ export default function PanelAdmin() {
     };
     loadStats();
   }, []);
+
+  const formatoCOP = (n) =>
+    new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    }).format(n || 0);
+
+    console.log("🔥 PANEL ADMIN CORRECTO CARGANDO, versión de prueba");
+
 
   return (
     <div className="min-h-screen bg-[#0b0b0b] text-white flex flex-col items-center py-16 px-6">
@@ -45,19 +61,19 @@ export default function PanelAdmin() {
         <div className="bg-[#111] border border-[#d4af37]/40 rounded-2xl p-6 text-center hover:border-[#d4af37] transition">
           <DollarSign className="w-8 h-8 mx-auto text-[#d4af37] mb-3" />
           <h3 className="text-[#d4af37] text-lg font-semibold">Ventas Totales</h3>
-          <p className="text-2xl font-bold mt-2">${stats.ventas.toLocaleString("es-CO")}</p>
+          <p className="text-2xl font-bold mt-2">{formatoCOP(stats.ventas)}</p>
         </div>
 
         <div className="bg-[#111] border border-[#d4af37]/40 rounded-2xl p-6 text-center hover:border-[#d4af37] transition">
           <CreditCard className="w-8 h-8 mx-auto text-[#d4af37] mb-3" />
           <h3 className="text-[#d4af37] text-lg font-semibold">Gastos Totales</h3>
-          <p className="text-2xl font-bold mt-2">${stats.gastos.toLocaleString("es-CO")}</p>
+          <p className="text-2xl font-bold mt-2">{formatoCOP(stats.gastos)}</p>
         </div>
 
         <div className="bg-[#111] border border-[#d4af37]/40 rounded-2xl p-6 text-center hover:border-[#d4af37] transition">
           <TrendingUp className="w-8 h-8 mx-auto text-[#d4af37] mb-3" />
           <h3 className="text-[#d4af37] text-lg font-semibold">Balance General</h3>
-          <p className="text-2xl font-bold mt-2">${stats.balance.toLocaleString("es-CO")}</p>
+          <p className="text-2xl font-bold mt-2">{formatoCOP(stats.balance)}</p>
         </div>
       </div>
 

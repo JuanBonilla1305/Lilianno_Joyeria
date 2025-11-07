@@ -1,27 +1,43 @@
-// src/controllers/ventaController.js
 import Venta from "../models/venta.js";
 
 export const crearVenta = async (req, res) => {
   try {
-    const venta = new Venta(req.body);
+    const { productos, total, notas } = req.body;
+
+    // Validación de productos
+    if (!productos || productos.length === 0) {
+      return res.status(400).json({ message: "Debe incluir productos" });
+    }
+
+    // Crear venta
+    const venta = new Venta({
+      productos: productos.map((p) => ({
+        nombre: p.nombre,
+        precioUnit: p.precioUnit,
+        cantidad: p.cantidad,
+        subtotal: p.subtotal,
+      })),
+      total,
+      notas, // opcional, ejemplo: "Pedido por WhatsApp"
+    });
+
     await venta.save();
-    res.status(201).json(venta);
+    res.status(201).json({ message: "Venta registrada con éxito", venta });
   } catch (error) {
-    console.error("Error al crear venta:", error);
+    console.error("❌ Error al crear venta:", error);
     res.status(500).json({ message: "Error al registrar la venta" });
   }
 };
 
 export const obtenerVentas = async (req, res) => {
   try {
-    const ventas = await Venta.find();
+    const ventas = await Venta.find().sort({ fecha: -1 });
     res.json(ventas);
   } catch (error) {
     res.status(500).json({ message: "Error al obtener ventas" });
   }
 };
 
-// 📊 Resumen simple
 export const obtenerResumen = async (req, res) => {
   try {
     const totalVentas = await Venta.countDocuments();
@@ -29,39 +45,12 @@ export const obtenerResumen = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$total" } } },
     ]);
 
-    const metodosPago = await Venta.aggregate([
-      { $group: { _id: "$metodo_pago", count: { $sum: 1 } } },
-    ]);
-
     res.json({
       totalVentas,
       totalIngresos: totalIngresos[0]?.total || 0,
-      metodosPago: metodosPago.reduce((acc, m) => {
-        acc[m._id] = m.count;
-        return acc;
-      }, {}),
     });
   } catch (error) {
     console.error("Error al generar resumen:", error);
     res.status(500).json({ message: "Error al generar resumen" });
-  }
-};
-export const crearPedido = async (req, res) => {
-  try {
-    const { items, total, nombre, direccion, telefono } = req.body;
-
-    const nuevaVenta = new Venta({
-      items,
-      total,
-      metodo_pago: "whatsapp",
-      estado: "pendiente",
-      notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
-    });
-
-    await nuevaVenta.save();
-    res.status(201).json({ message: "Pedido registrado correctamente", nuevaVenta });
-  } catch (error) {
-    console.error("❌ Error al registrar pedido:", error);
-    res.status(500).json({ message: "Error al registrar pedido" });
   }
 };
