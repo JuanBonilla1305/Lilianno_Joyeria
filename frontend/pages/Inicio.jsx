@@ -137,20 +137,16 @@ export default function Inicio() {
           transition={{ duration: 1, delay: 0.8 }}
           className="flex flex-col sm:flex-row gap-6"
         >
-          {!user ? (
-            <a
-              href="#"
-              className="bg-[#d4af37] text-black px-10 py-4 rounded-full font-semibold text-lg hover:scale-105 hover:bg-[#e8c157] transition-all"
-            >
-              Iniciar sesión con Google
-            </a>
-          ) : (
+          {/* Ya no está el botón de "Iniciar sesión con Google" */}
+          {user ? (
             <Link
               to="/catalogo"
               className="bg-[#d4af37] text-black px-10 py-4 rounded-full font-semibold text-lg hover:scale-105 hover:bg-[#e8c157] transition-all"
             >
               Ir al catálogo
             </Link>
+          ) : (
+            <></> // Si el usuario no está logueado, simplemente no mostrar nada
           )}
 
           <div className="flex gap-4 mt-6 sm:mt-0 justify-center">
