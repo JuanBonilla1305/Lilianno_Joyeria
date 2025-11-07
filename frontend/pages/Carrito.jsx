@@ -1,6 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useCart } from "../src/context/CartContext.jsx";  // Ajusta la ruta según la ubicación de tu archivo
+import { X } from "lucide-react";  // Asegúrate de que esta importación está presente
+import { Minus } from "lucide-react";  // Asegúrate de que esta importación esté presente
+import { Plus } from "lucide-react";  // Asegúrate de que esta importación esté presente
+import { Trash2 } from "lucide-react"; 
+
+
+
 
 const currency = (n) =>
   new Intl.NumberFormat("es-CO", {
