@@ -2,16 +2,16 @@
 
 import Venta from "../models/venta.js";
 
-// Crear una nueva venta
+// Crear una nueva venta (solo guardamos los datos para balance)
 export const crearVenta = async (req, res) => {
   try {
-    const { productos, total } = req.body; // Solo obtenemos los productos y el total
+    const { productos, total } = req.body;
 
     if (!productos || productos.length === 0) {
       return res.status(400).json({ message: "Debe incluir productos" });
     }
 
-    // Crear una nueva venta solo con los datos de los productos y el total
+    // Crear una nueva venta solo con los datos necesarios para el balance
     const venta = new Venta({
       productos: productos.map((p) => ({
         precioUnit: p.precioUnit,  // Solo guardamos el precio de cada producto
@@ -32,7 +32,7 @@ export const crearVenta = async (req, res) => {
 // Obtener todas las ventas
 export const obtenerVentas = async (req, res) => {
   try {
-    const ventas = await Venta.find().sort({ fecha: -1 }); // Obtenemos todas las ventas, ordenadas por fecha
+    const ventas = await Venta.find().sort({ fecha: -1 });
     res.json(ventas);
   } catch (error) {
     res.status(500).json({ message: "Error al obtener ventas" });
@@ -42,14 +42,14 @@ export const obtenerVentas = async (req, res) => {
 // Obtener resumen de ventas
 export const obtenerResumen = async (req, res) => {
   try {
-    const totalVentas = await Venta.countDocuments(); // Contamos el número de ventas
-    const totalIngresos = await Venta.aggregate([ // Sumamos el total de todas las ventas
+    const totalVentas = await Venta.countDocuments();
+    const totalIngresos = await Venta.aggregate([
       { $group: { _id: null, total: { $sum: "$total" } } },
     ]);
 
     res.json({
       totalVentas,
-      totalIngresos: totalIngresos[0]?.total || 0, // Si no hay ingresos, ponemos 0
+      totalIngresos: totalIngresos[0]?.total || 0,
     });
   } catch (error) {
     console.error("Error al generar resumen:", error);
