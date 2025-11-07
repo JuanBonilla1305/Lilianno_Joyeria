@@ -14,18 +14,38 @@ const ItemSchema = new mongoose.Schema(
 );
 
 // Esquema principal de la venta
-const VentaSchema = new mongoose.Schema(
-  {
-    items:       { type: [ItemSchema], required: true },
-    total:       { type: Number, required: true, min: 0 },
-    metodo_pago: { type: String, enum: ["tarjeta", "pse", "contraentrega", "whatsapp"], default: "tarjeta" },
-    estado:      { type: String, enum: ["pendiente", "pagada", "fallida"], default: "pendiente" },
-    usuarioId:   { type: String, required: true },  // Asegúrate de que esto sea obligatorio
-    notas:       { type: String, default: "" },
-    fecha:       { type: Date, default: Date.now },
-  },
-  { timestamps: true, versionKey: false }
-);
 
+export const crearPedido = async (req, res) => {
+  try {
+    const { items, total, nombre, direccion, telefono } = req.body;
+
+    // Asegurarte de que req.user esté disponible, lo que indica que el usuario está autenticado
+    if (!req.user || !req.user._id) {
+      return res.status(400).json({ message: "Usuario no autenticado" });
+    }
+
+    const nuevaVenta = new Venta({
+      usuarioId: req.user._id, // Asignar el usuarioId del usuario autenticado
+      items: items.map((p) => ({
+        productId: p._id || p.id,
+        nombre: p.nombre,
+        precioUnit: p.precio,
+        cantidad: p.qty,
+        imagen: p.imagen || "",
+        subtotal: p.precio * p.qty,
+      })),
+      total,
+      metodo_pago: "whatsapp", // Se podría actualizar si decides agregar métodos de pago diferentes
+      estado: "pendiente",
+      notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
+    });
+
+    await nuevaVenta.save();
+    res.status(201).json({ message: "Pedido registrado correctamente", nuevaVenta });
+  } catch (error) {
+    console.error("❌ Error al registrar pedido:", error);
+    res.status(500).json({ message: "Error al registrar pedido" });
+  }
+};
 // Modelo de la venta
 export default mongoose.models.Venta || mongoose.model("Venta", VentaSchema);

@@ -14,58 +14,55 @@ export default function Carrito({ abierto, onClose }) {
   const { items, updateQty, removeItem, clearCart, subtotal } = useCart();
 
   const enviarPedido = async () => {
-    const nombre = prompt("Tu nombre completo:");
-    const direccion = prompt("Dirección de entrega:");
-    const telefono = prompt("Tu número de WhatsApp:");
+  const nombre = prompt("Tu nombre completo:");
+  const direccion = prompt("Dirección de entrega:");
+  const telefono = prompt("Tu número de WhatsApp:");
 
-    if (!nombre || !direccion || !telefono) {
-      alert("Por favor completa todos los datos antes de continuar.");
-      return;
-    }
+  // Crear el mensaje para enviar a WhatsApp
+  const mensaje = encodeURIComponent(
+    `Hola, soy ${nombre}, quiero hacer un pedido:\n` +
+    `🧾 Total: ${currency(subtotal)}\n` +
+    `📦 Productos: ${items.map(p => p.nombre).join(", ")}\n` +
+    `🚚 Dirección: ${direccion}\n` +
+    `📞 Teléfono: ${telefono}`
+  );
 
-    try {
-      // Armar mensaje para WhatsApp
-      const mensaje = encodeURIComponent(
-        ` *Nuevo pedido de Lilianno Joyería* \n\n` +
-          ` Nombre: ${nombre}\n` +
-          `Teléfono: ${telefono}\n` +
-          `Dirección: ${direccion}\n\n` +
-          `Productos:\n${items
-            .map(
-              (p) =>
-                `- ${p.nombre} x${p.qty} → ${currency(p.precio * p.qty)}`
-            )
-            .join("\n")}\n\n` +
-          `💰 Total: ${currency(subtotal)}`
-      );
+  // Redirigir a WhatsApp con el mensaje
+  window.open(`https://wa.me/573243595562?text=${mensaje}`, "_blank");
 
-      // Número del dueño (código de país + número)
-      const numeroWhatsApp = "573243595562"; 
-      window.open(`https://wa.me/${numeroWhatsApp}?text=${mensaje}`, "_blank");
+  try {
+    // Enviar el pedido al backend
+    const token = localStorage.getItem("token"); // O donde sea que guardes el token
 
-      // Registrar pedido en el backend
-      await axios.post("https://lilianno-joyeria.onrender.com/api/ventas/pedido", {
-  items: items.map((p) => ({
-    productoId: p._id ?? p.id,
-    nombre: p.nombre,
-    precio: p.precio,
-    subtotal: p.precio * p.qty,
-  })),
-  total: subtotal,
-  nombre,
-  direccion,
-  telefono,
-});
+    const response = await axios.post(
+      "https://lilianno-joyeria.onrender.com/api/ventas/pedido",
+      {
+        items: items.map((p) => ({
+          productoId: p._id ?? p.id,
+          nombre: p.nombre,
+          precio: p.precio,
+          subtotal: p.precio * p.qty,
+        })),
+        total: subtotal,
+        nombre,
+        direccion,
+        telefono,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Enviar el token como un Bearer token
+        },
+      }
+    );
 
-
-      alert("✅ Pedido enviado y registrado correctamente");
-      clearCart();
-      onClose();
-    } catch (error) {
-      console.error("Error al enviar pedido:", error);
-      alert("❌ Ocurrió un error al enviar tu pedido.");
-    }
-  };
+    alert("✅ Pedido enviado y registrado correctamente");
+    clearCart(); // Limpiar el carrito
+    onClose(); // Cerrar el carrito
+  } catch (error) {
+    console.error("Error al enviar pedido:", error);
+    alert("❌ Ocurrió un error al enviar tu pedido.");
+  }
+};
 
   return (
     <div
