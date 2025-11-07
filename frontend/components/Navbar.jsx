@@ -80,12 +80,12 @@ export default function Navbar() {
           >
             Catálogo
           </Link>
-          <Link
+          {/*<Link
             to="/personalizar"
             className="text-[#d4af37] font-medium text-sm md:text-base tracking-wide hover:text-[#f5d47a] transition-colors"
           >
             Crear
-          </Link>
+          </Link>*/}
 
           {/* ✅ Solo visible si es admin */}
           {user?.rol === "admin" && (

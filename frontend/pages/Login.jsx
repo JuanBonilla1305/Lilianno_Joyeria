@@ -46,7 +46,6 @@ export default function Login() {
 
     function animate() {
       ctx.clearRect(0, 0, w, h);
-
       const gradient = ctx.createLinearGradient(0, 0, 0, h);
       gradient.addColorStop(0, "#000000");
       gradient.addColorStop(1, "#1a1205");
@@ -119,7 +118,6 @@ export default function Login() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // 🟡 Activamos animación y redirigimos después
       setTimeout(() => {
         navigate(data.user.rol?.toLowerCase() === "admin" ? "/panel" : "/catalogo");
       }, 1800);
@@ -140,7 +138,6 @@ export default function Login() {
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden text-white font-sans">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-0" />
 
-      {/* 💫 Transición dorada */}
       <AnimatePresence>
         {transitionActive && (
           <motion.div
@@ -153,75 +150,72 @@ export default function Login() {
         )}
       </AnimatePresence>
 
-      {/* 🪞 Caja del login */}
-      <div className="relative z-10 w-full max-w-md bg-black/75 backdrop-blur-md rounded-2xl p-8 border border-[#d4af37]/40 shadow-[0_0_35px_rgba(212,175,55,0.3)]">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-semibold text-[#d4af37] tracking-wide drop-shadow-[0_0_10px_rgba(212,175,55,0.6)]">
-            Lilianno Joyería
-          </h2>
-          <p className="text-gray-300 text-sm mt-2 leading-relaxed">
-            Elegancia, distinción y diseño hechos a mano.  
-            Inicia sesión para continuar tu experiencia.
+      {/* 🪞 Caja del login recortada y centrada */}
+      <div className="relative z-10 flex items-center justify-center w-full h-full">
+        <div className="w-full max-w-md bg-[#0b0b0b] bg-opacity-80 backdrop-blur-md rounded-xl p-8 border border-[#d4af37]/30 shadow-lg text-center">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-[#d4af37] tracking-wide">
+              Lilianno Joyería
+            </h2>
+            <p className="text-gray-400 text-sm mt-2">
+              Inicia sesión para descubrir nuestras creaciones únicas.
+            </p>
+          </div>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-sm text-[#d4af37] mb-1">Correo electrónico</label>
+              <input
+                type="email"
+                placeholder="correo@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-[#1a1a1a] border border-[#d4af37]/40 rounded-lg px-4 py-2.5 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#d4af37] outline-none transition"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-[#d4af37] mb-1">Contraseña</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#1a1a1a] border border-[#d4af37]/40 rounded-lg px-4 py-2.5 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#d4af37] outline-none transition"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2.5 bg-[#d4af37] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#e5c158] transition flex items-center justify-center gap-2 shadow-md relative overflow-hidden"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 hover:opacity-100 translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-700"></span>
+              <LogIn className="w-5 h-5 relative z-10" />
+              <span className="relative z-10">Entrar</span>
+            </button>
+          </form>
+
+          <div className="mt-5">
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full py-2.5 flex items-center justify-center gap-3 bg-white text-black font-semibold rounded-full hover:bg-[#d4af37]/20 hover:text-[#d4af37] transition-all shadow-md relative overflow-hidden"
+            >
+              <Mail className="w-5 h-5 text-[#d4af37]" />
+              <span>Iniciar sesión con Google</span>
+            </button>
+          </div>
+
+          {msg && <p className="text-center text-red-400 text-sm mt-3">{msg}</p>}
+
+          <p className="text-center text-sm text-gray-400 mt-5">
+            ¿No tienes cuenta?{" "}
+            <Link to="/register" className="text-[#d4af37] hover:underline">
+              Crear una cuenta
+            </Link>
           </p>
         </div>
-
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm text-[#d4af37] mb-1">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              placeholder="correo@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#1a1a1a]/90 border border-[#d4af37]/40 rounded-lg px-4 py-2.5 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#d4af37] outline-none transition"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-[#d4af37] mb-1">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#1a1a1a]/90 border border-[#d4af37]/40 rounded-lg px-4 py-2.5 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-[#d4af37] outline-none transition"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2.5 bg-[#d4af37] text-black font-semibold rounded-full hover:scale-105 hover:bg-[#e5c158] transition flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(212,175,55,0.4)] relative overflow-hidden"
-          >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 hover:opacity-100 translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-700"></span>
-            <LogIn className="w-5 h-5 relative z-10" /> 
-            <span className="relative z-10">Entrar</span>
-          </button>
-        </form>
-
-        <div className="mt-5">
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full py-2.5 flex items-center justify-center gap-3 bg-white text-black font-semibold rounded-full hover:bg-[#d4af37]/20 hover:text-[#d4af37] transition-all shadow-[0_0_15px_rgba(255,255,255,0.2)] relative overflow-hidden"
-          >
-            <Mail className="w-5 h-5 text-[#d4af37]" />
-            <span>Iniciar sesión con Google</span>
-          </button>
-        </div>
-
-        {msg && <p className="text-center text-red-400 text-sm mt-3">{msg}</p>}
-
-        <p className="text-center text-sm text-gray-400 mt-5">
-          ¿No tienes cuenta?{" "}
-          <Link to="/register" className="text-[#d4af37] hover:underline">
-            Crear una cuenta
-          </Link>
-        </p>
       </div>
     </div>
   );
