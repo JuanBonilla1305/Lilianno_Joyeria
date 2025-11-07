@@ -48,23 +48,32 @@ export const obtenerResumen = async (req, res) => {
 };
 export const crearPedido = async (req, res) => {
   try {
-    const nuevaVenta = new Venta({
-  usuarioId: "pedido-whatsapp", // 👈 relleno automático
-  items: items.map(p => ({
-    productId: p._id || "sin_id",
-    nombre: p.nombre,
-    precioUnit: p.precio || 0,
-    cantidad: p.cantidad || 1,
-    imagen: p.imagen || "",
-    subtotal: (p.precio || 0) * (p.cantidad || 1),
-  })),
-  total,
-  metodo_pago: "whatsapp",
-  estado: "pendiente",
-  notas: `Pedido de ${nombre} - ${direccion} - ${telefono}`,
-});
+    const { items, total, nombre, direccion, telefono } = req.body;
 
+    // Verifica que los datos requeridos están siendo enviados
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "El carrito está vacío" });
+    }
+
+    const nuevaVenta = new Venta({
+      usuarioId: "pedido-whatsapp", // Asegúrate de que el `usuarioId` sea adecuado
+      items: items.map((p) => ({
+        productoId: p.productoId || "sin_id",  // Asegúrate de que este campo sea adecuado
+        nombre: p.nombre,
+        precio: p.precio || 0,
+        cantidad: p.cantidad || 1,
+        subtotal: (p.precio || 0) * (p.cantidad || 1),
+      })),
+      total,
+      metodo_pago: "whatsapp",
+      estado: "pendiente",
+      notas: `Pedido de ${nombre} - ${direccion} - ${telefono}`,
+    });
+
+    // Guardar la venta en la base de datos
     await nuevaVenta.save();
+
+    // Confirmar que la venta fue guardada correctamente
     res.status(201).json({ message: "Pedido registrado correctamente", nuevaVenta });
   } catch (error) {
     console.error("❌ Error al registrar pedido:", error);
