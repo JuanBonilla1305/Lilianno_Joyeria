@@ -1,7 +1,6 @@
-import { useCart } from "../src/context/CartContext.jsx"; // Asegúrate de que este hook esté importado
-import { X, Minus, Plus, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { X, Trash2, Minus, Plus } from "lucide-react";
+import { useCart } from "../src/context/CartContext.jsx";  // Importa el contexto
+import { useEffect } from "react";
 import axios from "axios";
 
 const currency = (n) =>
@@ -15,23 +14,52 @@ export default function Carrito({ abierto, onClose }) {
   const { items, updateQty, removeItem, clearCart, subtotal } = useCart();
 
   const enviarPedido = async () => {
-    try {
-      const token = localStorage.getItem("token"); // O donde sea que guardes el token
+    const nombre = prompt("Tu nombre completo:");
+    const direccion = prompt("Dirección de entrega:");
+    const telefono = prompt("Tu número de WhatsApp:");
 
-      // Solo se envían los precios y totales, no más información
+    // Crear el mensaje para enviar a WhatsApp
+    const mensaje = encodeURIComponent(
+      `Hola, soy ${nombre}, quiero hacer un pedido:\n` +
+      `🧾 Total: ${currency(subtotal)}\n` +
+      `📦 Productos: ${items.map(p => p.nombre).join(", ")}\n` +
+      `🚚 Dirección: ${direccion}\n` +
+      `📞 Teléfono: ${telefono}`
+    );
+
+    // Redirigir a WhatsApp con el mensaje
+    window.open(`https://wa.me/573243595562?text=${mensaje}`, "_blank");
+
+    try {
+      // Enviar el pedido al backend
+      const token = localStorage.getItem("token");
+
+      console.log("🔥 Enviando pedido:", {
+        productos: items.map((p) => ({
+          nombre: p.nombre,
+          precioUnit: p.precio,
+          cantidad: p.qty,
+          subtotal: p.precio * p.qty,
+        })),
+        total: subtotal,
+        notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
+      });
+
       const response = await axios.post(
-        "https://lilianno-joyeria.onrender.com/api/ventas/pedido",
+        "https://lilianno-joyeria.onrender.com/api/ventas/pedido",  // Verifica que esta URL esté correcta
         {
           productos: items.map((p) => ({
-            precioUnit: p.precio,  // Solo guardamos el precio
-            cantidad: p.qty,       // Cantidad
-            subtotal: p.precio * p.qty,  // Subtotal
+            nombre: p.nombre,
+            precioUnit: p.precio,
+            cantidad: p.qty,
+            subtotal: p.precio * p.qty,
           })),
-          total: subtotal,  // Guardamos solo el total
+          total: subtotal,
+          notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Enviar el token como un Bearer token
+            Authorization: `Bearer ${token}`,  // Verifica que el token se esté enviando correctamente
           },
         }
       );
@@ -48,9 +76,7 @@ export default function Carrito({ abierto, onClose }) {
   return (
     <div
       className={`fixed left-0 right-0 top-0 z-50 bg-[#0b0b0b] text-white border-b border-[#d4af37]/40 transition-all duration-300 shadow-[0_8px_20px_rgba(212,175,55,0.15)] ${
-        abierto
-          ? "translate-y-0 opacity-100"
-          : "-translate-y-full opacity-0 pointer-events-none"
+        abierto ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
       }`}
     >
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#d4af37]/20">
@@ -73,17 +99,13 @@ export default function Carrito({ abierto, onClose }) {
               >
                 <img
                   src={it.imagen || "/placeholder-jewel.jpg"}
-                  onError={(e) =>
-                    (e.currentTarget.src = "/placeholder-jewel.jpg")
-                  }
+                  onError={(e) => (e.currentTarget.src = "/placeholder-jewel.jpg")}
                   alt={it.nombre}
                   className="w-20 h-20 object-cover rounded-lg"
                 />
                 <div className="flex-1">
                   <h4 className="font-semibold leading-5">{it.nombre}</h4>
-                  <p className="text-[#d4af37] font-bold mt-1">
-                    {currency(it.precio)}
-                  </p>
+                  <p className="text-[#d4af37] font-bold mt-1">{currency(it.precio)}</p>
 
                   <div className="flex items-center gap-2 mt-2">
                     <button
@@ -119,9 +141,7 @@ export default function Carrito({ abierto, onClose }) {
         <div className="border-t border-[#d4af37]/20 px-6 py-4 space-y-3 bg-[#0e0e0e]">
           <div className="flex justify-between text-zinc-300">
             <span>Subtotal</span>
-            <span className="font-semibold text-white">
-              {currency(subtotal)}
-            </span>
+            <span className="font-semibold text-white">{currency(subtotal)}</span>
           </div>
 
           <div className="flex gap-2">
