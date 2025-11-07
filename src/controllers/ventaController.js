@@ -1,4 +1,3 @@
-// src/controllers/ventaController.js
 import Venta from "../models/venta.js";
 
 export const crearVenta = async (req, res) => {
@@ -46,28 +45,32 @@ export const obtenerResumen = async (req, res) => {
     res.status(500).json({ message: "Error al generar resumen" });
   }
 };
+
+// Crear pedido (modificado para usar usuario autenticado)
 export const crearPedido = async (req, res) => {
   try {
     const { items, total, nombre, direccion, telefono } = req.body;
 
-    // Verifica que los datos requeridos están siendo enviados
-    if (!items || items.length === 0) {
-      return res.status(400).json({ message: "El carrito está vacío" });
+    // Verifica que el usuario esté autenticado
+    if (!req.user || !req.user._id) {
+      return res.status(400).json({ message: "Usuario no autenticado" });
     }
 
+    // Crear una nueva venta con el ID real del usuario
     const nuevaVenta = new Venta({
-      usuarioId: "pedido-whatsapp", // Asegúrate de que el `usuarioId` sea adecuado
+      usuarioId: req.user._id, // Guardamos el ID real del usuario autenticado
       items: items.map((p) => ({
-        productoId: p.productoId || "sin_id",  // Asegúrate de que este campo sea adecuado
+        productoId: p.productoId || p._id,  // Asegúrate de que `productoId` esté presente
         nombre: p.nombre,
-        precio: p.precio || 0,
-        cantidad: p.cantidad || 1,
-        subtotal: (p.precio || 0) * (p.cantidad || 1),
+        precioUnit: p.precio,  // Asegúrate de que `precio` esté presente
+        cantidad: p.qty,
+        imagen: p.imagen || "",
+        subtotal: p.precio * p.qty,
       })),
       total,
-      metodo_pago: "whatsapp",
+      metodo_pago: "whatsapp", // Esto puede cambiar según el método de pago
       estado: "pendiente",
-      notas: `Pedido de ${nombre} - ${direccion} - ${telefono}`,
+      notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
     });
 
     // Guardar la venta en la base de datos
