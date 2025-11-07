@@ -11,18 +11,24 @@ export const crearVenta = async (req, res) => {
       return res.status(400).json({ message: "Debe incluir productos" });
     }
 
-    // Crear una nueva venta solo con los datos necesarios para el balance
+    // Crear la venta
     const venta = new Venta({
       productos: productos.map((p) => ({
-        precioUnit: p.precioUnit,  // Solo guardamos el precio de cada producto
-        cantidad: p.cantidad,      // Guardamos la cantidad
-        subtotal: p.subtotal,      // Guardamos el subtotal
+        precioUnit: p.precioUnit,
+        cantidad: p.cantidad,
+        subtotal: p.subtotal,
       })),
-      total,  // Guardamos solo el total de la venta
+      total,
     });
 
-    await venta.save();
-    res.status(201).json({ message: "Venta registrada con éxito", venta });
+    // Guardar la venta en la base de datos
+    const nuevaVenta = await venta.save();
+
+    // Responder con los detalles de la venta guardada
+    res.status(201).json({
+      message: "Venta registrada con éxito",
+      venta: nuevaVenta,
+    });
   } catch (error) {
     console.error("❌ Error al crear venta:", error);
     res.status(500).json({ message: "Error al registrar la venta" });
