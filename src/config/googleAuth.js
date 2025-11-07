@@ -1,42 +1,31 @@
 // src/config/googleAuth.js
-import dotenv from "dotenv";
-dotenv.config();
-
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import Usuario from "../models/user.js";
+import dotenv from "dotenv";
+import Usuario from "../models/user.js"; // tu modelo de usuario
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+dotenv.config();
 
-const CALLBACK_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://lilianno-joyeria.onrender.com/api/auth/google/callback"
-    : "http://localhost:3001/api/auth/google/callback";
-
-console.log("🧭 Google OAuth listo →", CALLBACK_URL);
-
-// Estrategia de autenticación Google
 passport.use(
   new GoogleStrategy(
     {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: CALLBACK_URL,
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Buscar usuario existente
+        // Buscar o crear usuario
         let user = await Usuario.findOne({ googleId: profile.id });
 
-        // Si no existe, crear uno nuevo
         if (!user) {
-          user = await Usuario.create({
-            nombre: profile.displayName,
-            email: profile.emails[0].value,
+          user = new Usuario({
             googleId: profile.id,
-            rol: "cliente",
+            nombre: profile.displayName,
+            email: profile.emails?.[0]?.value,
+            avatar: profile.photos?.[0]?.value,
           });
+          await user.save();
         }
 
         return done(null, user);
@@ -48,20 +37,14 @@ passport.use(
   )
 );
 
-// 🔹 Serialización de usuario (guardar en sesión)
-passport.serializeUser((user, done) => {
-  // Passport usa este valor como referencia de sesión
-  done(null, user._id);
-});
-
-// 🔹 Deserialización de usuario (leer sesión)
+// Requerido para sesiones
+passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await Usuario.findById(id);
-    if (!user) return done(new Error("Usuario no encontrado"), null);
     done(null, user);
-  } catch (error) {
-    done(error, null);
+  } catch (err) {
+    done(err, null);
   }
 });
 
