@@ -48,15 +48,21 @@ export const obtenerResumen = async (req, res) => {
 };
 export const crearPedido = async (req, res) => {
   try {
-    const { items, total, nombre, direccion, telefono } = req.body;
-
     const nuevaVenta = new Venta({
-      items,
-      total,
-      metodo_pago: "whatsapp",
-      estado: "pendiente",
-      notas: `Pedido por WhatsApp de ${nombre} - ${direccion} - ${telefono}`,
-    });
+  usuarioId: "pedido-whatsapp", // 👈 relleno automático
+  items: items.map(p => ({
+    productId: p._id || "sin_id",
+    nombre: p.nombre,
+    precioUnit: p.precio || 0,
+    cantidad: p.cantidad || 1,
+    imagen: p.imagen || "",
+    subtotal: (p.precio || 0) * (p.cantidad || 1),
+  })),
+  total,
+  metodo_pago: "whatsapp",
+  estado: "pendiente",
+  notas: `Pedido de ${nombre} - ${direccion} - ${telefono}`,
+});
 
     await nuevaVenta.save();
     res.status(201).json({ message: "Pedido registrado correctamente", nuevaVenta });
