@@ -15,6 +15,7 @@ import AdminProductos from "../pages/AdminProductos.jsx";
 import PanelCliente from "../pages/PanelCliente.jsx";
 import Checkout from "./Checkout.jsx";
 import LoginSuccess from "../pages/loginSuccess.jsx";
+import Boletas from "../pages/Boletas.jsx";
 
 // 🧠 Contextos y rutas protegidas
 import { AuthProvider } from "./context/AuthContext.jsx";
@@ -40,6 +41,7 @@ export default function App() {
               <Route path="/personalizar" element={<Personalizar />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/carrito" element={<Carrito />} />
+              <Route path="/boletas" element={<Boletas />} />
 
               {/* 👤 Panel de cliente */}
               <Route
